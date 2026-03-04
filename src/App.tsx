@@ -15,6 +15,7 @@ import GymPage from '@/pages/GymPage';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
 import { initPushNotifications } from '@/services/pushNotifications';
+import { connectSSE, disconnectSSE } from '@/services/sseConnection';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
 
 // App root — initializes theme and defines all routes
@@ -30,12 +31,16 @@ export default function App() {
 
     const fetchPending = useFriendNotifStore((s) => s.fetchPending);
 
-    // Initialize Web Push + pending friend requests as soon as user is authenticated
+    // Initialize Web Push + SSE + pending friend requests as soon as user is authenticated
     React.useEffect(() => {
         if (isLoggedIn) {
             initPushNotifications().catch(() => { });
+            connectSSE();
             fetchPending();
+        } else {
+            disconnectSSE();
         }
+        return () => { disconnectSSE(); };
     }, [isLoggedIn, fetchPending]);
 
     return (

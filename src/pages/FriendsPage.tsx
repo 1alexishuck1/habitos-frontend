@@ -7,6 +7,7 @@ import * as friendsApi from '@/api/friends';
 import type { FriendEntry, FriendRequest, UserResult, ActivityItem, FriendMessage } from '@/api/friends';
 import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
+import { onSSE } from '@/services/sseConnection';
 import { useTranslation } from 'react-i18next';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -315,6 +316,30 @@ function ChatModal({
     useEffect(() => {
         loadHistory();
     }, [loadHistory]);
+
+    // Listen for real-time messages from this friend via SSE
+    useEffect(() => {
+        const unsub = onSSE('new_message', (data: any) => {
+            if (data.senderId !== friend.id) return;
+            const msg: FriendMessage = {
+                id: data.id,
+                senderId: data.senderId,
+                receiverId: currentUser?.id ?? '',
+                message: data.message,
+                isRead: true, // we're looking at it right now
+                createdAt: data.createdAt,
+                sender: { id: data.senderId, name: data.senderName ?? friend.name },
+            };
+            setHistory(prev => {
+                if (prev.find(x => x.id === msg.id)) return prev;
+                return [...prev, msg];
+            });
+            // Mark as read immediately
+            friendsApi.markMessagesAsRead([data.id]).catch(() => { });
+            removeUnreadMessagesForFriend(friend.id);
+        });
+        return unsub;
+    }, [friend.id, friend.name, currentUser?.id, removeUnreadMessagesForFriend]);
 
     // Auto-scroll to bottom of chat
     useEffect(() => {
