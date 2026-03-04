@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    /* Prevent font scaling on iOS orientation change */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-surface-900 text-white min-h-screen;
+    /* Safe area for notched/Dynamic-Island phones */
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    overflow-x: hidden;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-600 rounded-full;
+  }
+
+  /* Override Chrome autofill yellow/white background */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #293548 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* ── Prevent iOS auto-zoom on input focus ───────────────────────────────────
+     iOS Safari zooms in whenever a focused input's font-size < 16px.
+     Tailwind utility classes (.text-sm = 14px) override standard element rules because 
+     class selectors have higher specificity. We use !important to guarantee it wins. */
+  @media screen and (max-width: 768px) {
+
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+}
+
+@layer components {
+
+  /* Card surface */
+  .card {
+    @apply bg-surface-800 rounded-2xl p-4 border border-surface-700/50;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none text-sm sm:text-base;
+  }
+
+  .btn-ghost {
+    @apply bg-surface-700/60 hover:bg-surface-600 active:scale-95 text-white/80 font-medium px-3 py-2 rounded-xl transition-all duration-150 text-sm;
+  }
+
+  .btn-danger {
+    @apply bg-accent-red/20 hover:bg-accent-red/40 active:scale-95 text-accent-red font-semibold px-3 py-2 rounded-xl transition-all duration-150 text-sm;
+  }
+
+  /* Input — proper mobile sizing (min 16px to prevent iOS zoom) */
+  .input {
+    @apply w-full bg-surface-700 border border-surface-600 rounded-lg px-3 py-2.5 text-base text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-150;
+    font-size: 16px;
+    /* iOS won't zoom if >= 16px */
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  /* Nav item (legacy — kept for compatibility) */
+  .nav-item {
+    @apply flex flex-col items-center gap-0.5 flex-1 py-2 text-xs font-medium transition-colors duration-150 cursor-pointer;
+  }
+
+  /* Section header */
+  .section-title {
+    @apply text-base font-bold text-white;
+  }
+
+  /* Progress ring container */
+  .progress-ring {
+    @apply relative inline-flex items-center justify-center;
+  }
+
+  /* Modal overlay */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4;
+  }
+
+  /* Modal panel — bottom sheet on mobile, centered dialog on sm+ */
+  .modal-panel {
+    @apply w-full sm:max-w-sm bg-surface-800 rounded-t-3xl sm:rounded-3xl max-h-[92dvh] overflow-y-auto p-5 sm:p-6;
+    animation: slideUpFull 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @media (min-width: 640px) {
+    .modal-panel {
+      animation: slideUp 0.25s ease-out;
+    }
+  }
+}
+
+@layer utilities {
+  .text-muted {
+    @apply text-white/50;
+  }
+
+  .text-soft {
+    @apply text-white/70;
+  }
+
+  .border-soft {
+    @apply border-surface-700;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Main content area — adapts to hamburger top bar on mobile */
+  .page-content {
+    @apply pb-8 px-4 pt-4 lg:pb-6 lg:pt-0 lg:px-0;
+  }
+
+  /* Safe bottom padding for drawer/nav elements */
+  .pb-safe {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  /* Prevent horizontal overflow everywhere */
+  .contain-layout {
+    overflow-x: hidden;
+    width: 100%;
+  }
+}
