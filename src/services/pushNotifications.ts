@@ -3,6 +3,8 @@
 
 import { useAuthStore } from '@/store/authStore';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function getAuthHeader(): HeadersInit {
     const token = useAuthStore.getState().accessToken;
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -16,7 +18,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 async function getVapidPublicKey(): Promise<string> {
-    const res = await fetch('/push/vapid-public-key');
+    const res = await fetch(`${API_URL}/push/vapid-public-key`);
     const data = await res.json();
     return data.publicKey as string;
 }
@@ -27,7 +29,7 @@ async function sendSubscriptionToServer(subscription: PushSubscription): Promise
         keys: { p256dh: string; auth: string };
     };
 
-    await fetch('/push/subscribe', {
+    await fetch(`${API_URL}/push/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify({ endpoint: sub.endpoint, keys: sub.keys }),
@@ -105,7 +107,7 @@ export async function unsubscribePush(): Promise<void> {
     const endpoint = sub.endpoint;
     await sub.unsubscribe();
 
-    await fetch('/push/subscribe', {
+    await fetch(`${API_URL}/push/subscribe`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify({ endpoint }),

@@ -3,8 +3,10 @@ import { useAuthStore } from '@/store/authStore';
 
 // Axios instance — attaches access token and handles 401 → refresh flow
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const api = axios.create({
-    baseURL: '/', // proxied by Vite in dev; set VITE_API_URL for prod
+    baseURL: API_URL || '/', // proxied by Vite in dev; set VITE_API_URL for prod
     timeout: 10000,
 });
 
@@ -55,7 +57,7 @@ api.interceptors.response.use(
             const { refreshToken, setTokens } = useAuthStore.getState();
             if (!refreshToken) throw new Error('No refresh token');
 
-            const { data } = await axios.post('/auth/refresh', { refreshToken });
+            const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
             setTokens(data.accessToken, data.refreshToken);
             processQueue(null, data.accessToken);
             original.headers.Authorization = `Bearer ${data.accessToken}`;
