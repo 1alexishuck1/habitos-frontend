@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/authStore';
 import { initPushNotifications } from '@/services/pushNotifications';
 import { connectSSE, disconnectSSE } from '@/services/sseConnection';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
+import { Analytics } from '@vercel/analytics/react';
 
 // App root — initializes theme and defines all routes
 
@@ -45,6 +46,7 @@ export default function App() {
 
     return (
         <BrowserRouter>
+            <Analytics />
             <Routes>
                 {/* Public */}
                 <Route path="/login" element={<LoginPage />} />
