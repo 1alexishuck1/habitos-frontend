@@ -285,12 +285,20 @@ function ChatModal({
     const chatRef = useRef<HTMLDivElement>(null);
     const currentUser = useAuthStore(s => s.user);
 
+    const SPECIAL_PAIR = [
+        '7cf8c230-024e-44c8-8c3f-b5f59e86f438',
+        '1c30001a-ba62-47f4-ad41-bbcdc137e221',
+    ];
+    const isSpecialChat =
+        currentUser?.id && SPECIAL_PAIR.includes(currentUser.id) && SPECIAL_PAIR.includes(friend.id);
+
     const MOTIVATION_MESSAGES = [
         t('friends.motivateMsg1'),
         t('friends.motivateMsg2'),
         t('friends.motivateMsg3'),
         t('friends.motivateMsg4'),
         t('friends.motivateMsg5'),
+        ...(isSpecialChat ? ['Te quiero ❤️'] : []),
     ];
 
     const removeUnreadMessagesForFriend = useFriendNotifStore(s => s.removeUnreadMessagesForFriend);
