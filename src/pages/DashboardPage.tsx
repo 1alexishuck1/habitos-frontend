@@ -388,7 +388,7 @@ export default function DashboardPage() {
                                         {group.map(h => (
                                             <HabitRow key={h.id} habit={h} onCheck={handleHabitCheck} onUncheck={handleHabitUncheck} disabled={!isSelectedToday} onCounterClick={(habit) => {
                                                 setCounterHabit(habit);
-                                                setCounterValue(1);
+                                                setCounterValue(0);
                                             }} />
                                         ))}
                                     </div>
@@ -441,47 +441,23 @@ export default function DashboardPage() {
                                 </div>
                             </div>
 
-                            <div className="flex-1 flex flex-col justify-center items-center px-6 pb-6 pt-2 z-10">
-                                <div className="flex items-center gap-6 mb-6">
+                            <div className="flex-1 flex flex-col justify-center items-center px-6 pb-8 pt-2 z-10">
+                                <div className="flex items-center gap-6">
                                     <button
                                         onClick={() => setCounterValue(counterValue - 1)}
-                                        className="w-12 h-12 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-2xl font-bold transition-all active:scale-95 border border-surface-600/50"
+                                        className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg"
                                     >
                                         -
                                     </button>
-                                    <span className={`text-5xl font-black tabular-nums leading-none w-24 text-center ${counterValue >= 0 ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-accent-amber' : 'text-red-400'}`}>
+                                    <span className={`text-5xl font-black tabular-nums leading-none w-28 text-center ${counterValue > 0 ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-accent-amber' : counterValue < 0 ? 'text-red-400' : 'text-white/20'}`}>
                                         {counterValue > 0 ? `+${counterValue}` : counterValue}
                                     </span>
                                     <button
                                         onClick={() => setCounterValue(counterValue + 1)}
-                                        className="w-12 h-12 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-2xl font-bold transition-all active:scale-95 border border-surface-600/50"
+                                        className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg"
                                     >
                                         +
                                     </button>
-                                </div>
-                                <div className="space-y-2 w-full max-w-[220px]">
-                                    <div className="flex gap-2 justify-center">
-                                        {[1, 5, 10].map(val => (
-                                            <button
-                                                key={`plus-${val}`}
-                                                onClick={() => setCounterValue(counterValue + val)}
-                                                className="flex-1 py-1.5 bg-primary-500/10 hover:bg-primary-500/20 rounded-lg text-xs font-bold text-primary-400 transition-colors active:scale-95 border border-primary-500/20"
-                                            >
-                                                +{val}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="flex gap-2 justify-center">
-                                        {[1, 5, 10].map(val => (
-                                            <button
-                                                key={`minus-${val}`}
-                                                onClick={() => setCounterValue(counterValue - val)}
-                                                className="flex-1 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-lg text-xs font-bold text-red-400 transition-colors active:scale-95 border border-red-500/20"
-                                            >
-                                                -{val}
-                                            </button>
-                                        ))}
-                                    </div>
                                 </div>
                             </div>
 
@@ -489,7 +465,11 @@ export default function DashboardPage() {
                                 <button onClick={() => setCounterHabit(null)} className="btn-ghost font-bold text-xs py-3 rounded-xl">
                                     CANCELAR
                                 </button>
-                                <button onClick={handleCounterSubmit} className="btn-primary font-bold text-xs py-3 rounded-xl shadow-[0_4px_12px_rgba(236,72,153,0.3)]">
+                                <button
+                                    onClick={handleCounterSubmit}
+                                    disabled={counterValue === 0}
+                                    className="btn-primary font-bold text-xs py-3 rounded-xl shadow-[0_4px_12px_rgba(236,72,153,0.3)] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed"
+                                >
                                     GUARDAR
                                 </button>
                             </div>
