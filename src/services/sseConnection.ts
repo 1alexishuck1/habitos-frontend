@@ -33,11 +33,17 @@ export function connectSSE() {
     // EventSource doesn't support custom headers, so we pass the token as a query param.
     // The backend auth middleware must support ?token= as fallback.
     const url = `${API_URL}/friends/events?token=${encodeURIComponent(token)}`;
-    eventSource = new EventSource(url);
+    console.info('[sse] Connecting to', url.replace(token, '***'));
+    eventSource = new EventSource(url, { withCredentials: true });
+
+    eventSource.onopen = () => {
+        console.info('[sse] Connected');
+    };
 
     eventSource.addEventListener('friend_request', (e) => {
         try {
             const data = JSON.parse(e.data);
+            console.info('[sse] friend_request event received', data);
             const store = useFriendNotifStore.getState();
             store.setPendingCount(store.pendingCount + 1);
             dispatch('friend_request', data);
@@ -47,6 +53,7 @@ export function connectSSE() {
     eventSource.addEventListener('new_message', (e) => {
         try {
             const data = JSON.parse(e.data);
+            console.info('[sse] new_message event received', data);
             const msg = {
                 id: data.id,
                 senderId: data.senderId,
@@ -61,7 +68,8 @@ export function connectSSE() {
         } catch { /* ignore parse errors */ }
     });
 
-    eventSource.onerror = () => {
+    eventSource.onerror = (err) => {
+        console.warn('[sse] Connection error, will reconnect in 5s', err);
         eventSource?.close();
         eventSource = null;
         // Reconnect after 5 seconds
