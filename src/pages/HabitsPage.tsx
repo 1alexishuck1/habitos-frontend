@@ -161,6 +161,7 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
     const { t } = useTranslation();
     const [mode, setMode] = useState<'template' | 'custom'>('template');
     const [selectedCat, setSelectedCat] = useState<string | null>(null);
+    const [selectedTemplate, setSelectedTemplate] = useState<HabitTemplate | null>(null);
     const [form, setForm] = useState({
         name: '', type: 'CHECK', frequencyType: 'DAILY',
         frequencyDays: [] as number[], description: '', category: '',
@@ -184,13 +185,30 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
         if (group.length > 0) templateGroups.push({ meta: cat, templates: group });
     }
 
-    const handleTemplate = async (tpl: HabitTemplate) => {
+    const handleSelectTemplate = (tpl: HabitTemplate) => {
+        setSelectedTemplate(tpl);
+        setForm({
+            name: tpl.name,
+            type: tpl.type,
+            frequencyType: tpl.defaultFrequency,
+            frequencyDays: [],
+            description: tpl.description ?? '',
+            category: tpl.category ?? '',
+        });
+    };
+
+    const handleConfirmTemplate = async () => {
+        if (!selectedTemplate) return;
         setLoading(true);
         try {
             const { data } = await habitApi.create({
-                templateId: tpl.id, name: tpl.name, type: tpl.type,
-                frequencyType: tpl.defaultFrequency, description: tpl.description ?? '',
-                category: tpl.category ?? undefined,
+                templateId: selectedTemplate.id,
+                name: selectedTemplate.name,
+                type: selectedTemplate.type,
+                frequencyType: form.frequencyType,
+                frequencyDays: form.frequencyType === 'SPECIFIC_DAYS' ? form.frequencyDays : undefined,
+                description: selectedTemplate.description ?? '',
+                category: selectedTemplate.category ?? undefined,
             });
             onCreate(data);
         } finally { setLoading(false); }
@@ -205,66 +223,148 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
         } finally { setLoading(false); }
     };
 
+    // ─── Frequency picker (shared between template config and custom form) ──
+    const FrequencyPicker = () => (
+        <div>
+            <label className="block text-sm text-soft mb-1.5">Frecuencia</label>
+            <select className="input" value={form.frequencyType} onChange={e => setForm({ ...form, frequencyType: e.target.value })}>
+                <option value="DAILY">{t('habits.frequency.DAILY')}</option>
+                <option value="WEEKLY">{t('habits.frequency.WEEKLY')}</option>
+                <option value="SPECIFIC_DAYS">{t('habits.frequency.SPECIFIC_DAYS')}</option>
+            </select>
+
+            {/* Quick shortcuts */}
+            <div className="flex gap-2 mt-2">
+                <button type="button"
+                    onClick={() => setForm(f => ({ ...f, frequencyType: 'SPECIFIC_DAYS', frequencyDays: WEEKDAYS }))}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${form.frequencyType === 'SPECIFIC_DAYS' &&
+                        WEEKDAYS.every(d => form.frequencyDays.includes(d)) && form.frequencyDays.length === WEEKDAYS.length
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-surface-700 text-soft hover:bg-surface-600'
+                        }`}>
+                    📅 Sem.
+                </button>
+                <button type="button"
+                    onClick={() => setForm(f => ({ ...f, frequencyType: 'SPECIFIC_DAYS', frequencyDays: WEEKEND }))}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${form.frequencyType === 'SPECIFIC_DAYS' &&
+                        WEEKEND.every(d => form.frequencyDays.includes(d)) && form.frequencyDays.length === WEEKEND.length
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-surface-700 text-soft hover:bg-surface-600'
+                        }`}>
+                    🎉 Finde
+                </button>
+            </div>
+
+            {form.frequencyType === 'SPECIFIC_DAYS' && (
+                <div className="mt-2">
+                    <label className="block text-sm text-soft mb-2">Días</label>
+                    <div className="flex gap-2">
+                        {DOW.map(d => (
+                            <button key={d} type="button"
+                                onClick={() => setForm(f => ({
+                                    ...f,
+                                    frequencyDays: f.frequencyDays.includes(d)
+                                        ? f.frequencyDays.filter(x => x !== d)
+                                        : [...f.frequencyDays, d]
+                                }))}
+                                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${form.frequencyDays.includes(d) ? 'bg-primary-500 text-white' : 'bg-surface-700 text-soft'
+                                    }`}>
+                                {dowLabels[d]}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="modal-overlay animate-fade-in"
             onClick={(e) => e.target === e.currentTarget && onClose()}>
             <div className="modal-panel animate-slide-up relative">
                 {/* Mode tabs */}
                 <div className="flex gap-2 mb-5">
-                    <button onClick={() => setMode('template')}
+                    <button onClick={() => { setMode('template'); setSelectedTemplate(null); }}
                         className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${mode === 'template' ? 'bg-primary-500 text-white' : 'bg-surface-700 text-soft'}`}>
                         {t('habits.addFromTemplate')}
                     </button>
-                    <button onClick={() => setMode('custom')}
+                    <button onClick={() => { setMode('custom'); setSelectedTemplate(null); }}
                         className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${mode === 'custom' ? 'bg-primary-500 text-white' : 'bg-surface-700 text-soft'}`}>
                         {t('habits.addHabit')}
                     </button>
                 </div>
 
                 {mode === 'template' ? (
-                    <div>
-                        {/* Category filter chips */}
-                        <div className="flex gap-2 flex-wrap mb-4">
-                            <button
-                                onClick={() => setSelectedCat(null)}
-                                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all border ${!selectedCat ? 'bg-primary-500 border-primary-500 text-white' : 'border-surface-600 text-muted hover:border-white/30'}`}
-                            >
-                                Todos
-                            </button>
-                            {CATEGORIES.filter(c => templates.some(t => t.category === c.value)).map(cat => (
-                                <button
-                                    key={cat.value}
-                                    onClick={() => setSelectedCat(selectedCat === cat.value ? null : cat.value)}
-                                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all border flex items-center gap-1 ${selectedCat === cat.value ? 'bg-primary-500 border-primary-500 text-white' : 'border-surface-600 text-muted hover:border-white/30'}`}
-                                >
-                                    <span>{cat.emoji}</span> {cat.label}
-                                </button>
-                            ))}
-                        </div>
+                    selectedTemplate ? (
+                        /* ── Template frequency config step ── */
+                        <div className="space-y-4 animate-fade-in">
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-700/50">
+                                <span className="text-2xl">{selectedTemplate.icon}</span>
+                                <div>
+                                    <p className="text-sm font-semibold text-white">{selectedTemplate.name}</p>
+                                    <p className="text-[11px] text-muted">{selectedTemplate.description}</p>
+                                </div>
+                            </div>
 
-                        {/* Templates grouped or filtered */}
-                        {selectedCat ? (
-                            <div className="space-y-2">
-                                {filteredTemplates.map(tpl => (
-                                    <TemplateButton key={tpl.id} tpl={tpl} loading={loading} onClick={handleTemplate} t={t} />
+                            <FrequencyPicker />
+
+                            <div className="flex gap-2">
+                                <button type="button" onClick={() => setSelectedTemplate(null)}
+                                    className="btn-ghost flex-1">
+                                    ← Volver
+                                </button>
+                                <button type="button" onClick={handleConfirmTemplate}
+                                    className="btn-primary flex-1" disabled={loading}>
+                                    {loading ? t('common.loading') : t('common.save')}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        /* ── Template list ── */
+                        <div>
+                            {/* Category filter chips */}
+                            <div className="flex gap-2 flex-wrap mb-4">
+                                <button
+                                    onClick={() => setSelectedCat(null)}
+                                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all border ${!selectedCat ? 'bg-primary-500 border-primary-500 text-white' : 'border-surface-600 text-muted hover:border-white/30'}`}
+                                >
+                                    Todos
+                                </button>
+                                {CATEGORIES.filter(c => templates.some(t => t.category === c.value)).map(cat => (
+                                    <button
+                                        key={cat.value}
+                                        onClick={() => setSelectedCat(selectedCat === cat.value ? null : cat.value)}
+                                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-all border flex items-center gap-1 ${selectedCat === cat.value ? 'bg-primary-500 border-primary-500 text-white' : 'border-surface-600 text-muted hover:border-white/30'}`}
+                                    >
+                                        <span>{cat.emoji}</span> {cat.label}
+                                    </button>
                                 ))}
                             </div>
-                        ) : (
-                            templateGroups.map(({ meta, templates: group }) => (
-                                <div key={meta.value} className="mb-4">
-                                    <div className="flex items-center gap-1.5 mb-2 px-1">
-                                        <span>{meta.emoji}</span>
-                                        <p className={`text-[10px] font-bold uppercase tracking-widest ${meta.color}`}>{meta.label}</p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        {group.map(tpl => (
-                                            <TemplateButton key={tpl.id} tpl={tpl} loading={loading} onClick={handleTemplate} t={t} />
-                                        ))}
-                                    </div>
+
+                            {/* Templates grouped or filtered */}
+                            {selectedCat ? (
+                                <div className="space-y-2">
+                                    {filteredTemplates.map(tpl => (
+                                        <TemplateButton key={tpl.id} tpl={tpl} loading={loading} onClick={handleSelectTemplate} t={t} />
+                                    ))}
                                 </div>
-                            ))
-                        )}
-                    </div>
+                            ) : (
+                                templateGroups.map(({ meta, templates: group }) => (
+                                    <div key={meta.value} className="mb-4">
+                                        <div className="flex items-center gap-1.5 mb-2 px-1">
+                                            <span>{meta.emoji}</span>
+                                            <p className={`text-[10px] font-bold uppercase tracking-widest ${meta.color}`}>{meta.label}</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {group.map(tpl => (
+                                                <TemplateButton key={tpl.id} tpl={tpl} loading={loading} onClick={handleSelectTemplate} t={t} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )
                 ) : (
                     <form onSubmit={handleCustom} className="space-y-4">
                         <div>
@@ -292,65 +392,16 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-sm text-soft mb-1.5">Tipo</label>
-                                <select className="input" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
-                                    <option value="CHECK">{t('habits.type.CHECK')}</option>
-                                    <option value="COUNTER">{t('habits.type.COUNTER')}</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm text-soft mb-1.5">Frecuencia</label>
-                                <select className="input" value={form.frequencyType} onChange={e => setForm({ ...form, frequencyType: e.target.value })}>
-                                    <option value="DAILY">{t('habits.frequency.DAILY')}</option>
-                                    <option value="WEEKLY">{t('habits.frequency.WEEKLY')}</option>
-                                    <option value="SPECIFIC_DAYS">{t('habits.frequency.SPECIFIC_DAYS')}</option>
-                                </select>
-
-                                {/* Quick shortcuts */}
-                                <div className="flex gap-2 mt-2">
-                                    <button type="button"
-                                        onClick={() => setForm(f => ({ ...f, frequencyType: 'SPECIFIC_DAYS', frequencyDays: WEEKDAYS }))}
-                                        className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${form.frequencyType === 'SPECIFIC_DAYS' &&
-                                            WEEKDAYS.every(d => form.frequencyDays.includes(d)) && form.frequencyDays.length === WEEKDAYS.length
-                                            ? 'bg-primary-500 text-white'
-                                            : 'bg-surface-700 text-soft hover:bg-surface-600'
-                                            }`}>
-                                        📅 Sem.
-                                    </button>
-                                    <button type="button"
-                                        onClick={() => setForm(f => ({ ...f, frequencyType: 'SPECIFIC_DAYS', frequencyDays: WEEKEND }))}
-                                        className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${form.frequencyType === 'SPECIFIC_DAYS' &&
-                                            WEEKEND.every(d => form.frequencyDays.includes(d)) && form.frequencyDays.length === WEEKEND.length
-                                            ? 'bg-primary-500 text-white'
-                                            : 'bg-surface-700 text-soft hover:bg-surface-600'
-                                            }`}>
-                                        🎉 Finde
-                                    </button>
-                                </div>
-                            </div>
+                        <div>
+                            <label className="block text-sm text-soft mb-1.5">Tipo</label>
+                            <select className="input" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+                                <option value="CHECK">{t('habits.type.CHECK')}</option>
+                                <option value="COUNTER">{t('habits.type.COUNTER')}</option>
+                            </select>
                         </div>
-                        {form.frequencyType === 'SPECIFIC_DAYS' && (
-                            <div>
-                                <label className="block text-sm text-soft mb-2">Días</label>
-                                <div className="flex gap-2">
-                                    {DOW.map(d => (
-                                        <button key={d} type="button"
-                                            onClick={() => setForm(f => ({
-                                                ...f,
-                                                frequencyDays: f.frequencyDays.includes(d)
-                                                    ? f.frequencyDays.filter(x => x !== d)
-                                                    : [...f.frequencyDays, d]
-                                            }))}
-                                            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${form.frequencyDays.includes(d) ? 'bg-primary-500 text-white' : 'bg-surface-700 text-soft'
-                                                }`}>
-                                            {dowLabels[d]}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+
+                        <FrequencyPicker />
+
                         <button type="submit" className="btn-primary w-full" disabled={loading}>
                             {loading ? t('common.loading') : t('common.save')}
                         </button>
@@ -399,7 +450,9 @@ export default function HabitsPage() {
 
     const handleLog = async (id: string) => {
         await habitApi.log(id, { value: 1 });
-        updateHabit({ id, todayCompleted: true });
+        // Refetch to get updated streak values from backend
+        const { data } = await habitApi.getAll();
+        setHabits(data);
     };
 
     const handlePause = async (id: string) => {
