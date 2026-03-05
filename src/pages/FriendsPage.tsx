@@ -612,13 +612,13 @@ export default function FriendsPage() {
                 .friends-page {
                     max-width: 680px;
                     margin: 0 auto;
-                    padding: 1.5rem 1rem 5rem;
+                    padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom, 0px));
                 }
 
                 /* Toast notification */
                 .friend-toast {
                     position: fixed;
-                    top: 1.25rem;
+                    top: calc(4.5rem + env(safe-area-inset-top, 0px));
                     left: 50%;
                     transform: translateX(-50%);
                     z-index: 9999;

@@ -44,6 +44,14 @@ export default function App() {
         return () => { disconnectSSE(); };
     }, [isLoggedIn, fetchPending]);
 
+    // Update tab title with notification count
+    const pendingCount = useFriendNotifStore((s) => s.pendingCount);
+    const unreadCount = useFriendNotifStore((s) => s.unreadMessages.length);
+    React.useEffect(() => {
+        const total = pendingCount + unreadCount;
+        document.title = total > 0 ? `Hábitos (${total})` : 'Hábitos';
+    }, [pendingCount, unreadCount]);
+
     return (
         <BrowserRouter>
             <Analytics />

@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import MobileMenu from './BottomNav';
 import Sidebar from './Sidebar';
 import IosInstallBanner from './IosInstallBanner';
-import { useAuthStore } from '@/store/authStore';
+import { onSSE } from '@/services/sseConnection';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
 import * as friendsApi from '@/api/friends';
 
@@ -13,7 +13,6 @@ export default function Layout() {
     const [toast, setToast] = useState<string | null>(null);
     const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const addUnreadMessage = useFriendNotifStore((s) => s.addUnreadMessage);
     const setPendingCount = useFriendNotifStore((s) => s.setPendingCount);
 
     function showToast(msg: string) {
@@ -22,32 +21,21 @@ export default function Layout() {
         toastTimer.current = setTimeout(() => setToast(null), 4000);
     }
 
-    // ─── Global SSE Connection ──────────────────────────────────────────────
+    // ─── Listen to SSE events for toast notifications ──────────────────────
     useEffect(() => {
-        const token = useAuthStore.getState().accessToken;
-        if (!token) return;
-
-        const es = new EventSource(`/friends/events?token=${encodeURIComponent(token)}`);
-
-        es.addEventListener('friend_request', () => {
+        const unsubRequest = onSSE('friend_request', () => {
             friendsApi.listPendingRequests()
                 .then(data => setPendingCount(Array.isArray(data) ? data.length : 0))
                 .catch(() => { });
-            showToast('\uD83D\uDC65 \u00A1Ten\u00E9s una nueva solicitud de amistad!');
+            showToast('👥 ¡Tenés una nueva solicitud de amistad!');
         });
 
-        es.addEventListener('new_message', (e: any) => {
-            try {
-                const data = JSON.parse(e.data);
-                showToast(`💬 ${data.senderName}: ${data.message}`);
-                addUnreadMessage(data);
-            } catch (err) { /* ignore */ }
+        const unsubMessage = onSSE('new_message', (data: any) => {
+            showToast(`💬 ${data.senderName}: ${data.message}`);
         });
 
-        es.onerror = () => { /* reconnects automatically */ };
-
-        return () => es.close();
-    }, [addUnreadMessage, setPendingCount]);
+        return () => { unsubRequest(); unsubMessage(); };
+    }, [setPendingCount]);
 
     return (
         <div className="min-h-screen bg-surface-900 flex relative">

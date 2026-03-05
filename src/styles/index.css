@@ -151,7 +151,14 @@
 
   /* Main content area — adapts to hamburger top bar on mobile */
   .page-content {
-    @apply pb-8 px-4 pt-4 lg:pb-6 lg:pt-0 lg:px-0;
+    @apply px-4 pt-4 lg:pt-0 lg:px-0;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (min-width: 1024px) {
+    .page-content {
+      padding-bottom: 1.5rem;
+    }
   }
 
   /* Safe bottom padding for drawer/nav elements */
@@ -164,4 +171,17 @@
     overflow-x: hidden;
     width: 100%;
   }
+}
+
+/* ── Modal safe-area fixes (outside @layer to avoid specificity issues) ───── */
+
+.modal-overlay {
+  /* Ensure modal is always above the mobile header */
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.modal-panel {
+  /* Prevent panel from going under status bar or home indicator */
+  max-height: calc(92dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
 }
