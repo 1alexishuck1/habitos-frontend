@@ -13,14 +13,14 @@ function StatCard({ label, value, sub, icon: Icon, color }: {
     icon: any; color: string;
 }) {
     return (
-        <div className="card flex items-center gap-4 border-surface-700/50 bg-surface-800/40">
-            <div className={`w-11 h-11 rounded-2xl ${color} flex items-center justify-center flex-shrink-0 shadow-lg shadow-black/20`}>
-                <Icon size={20} className="text-white" />
+        <div className="card flex items-center gap-3 border-surface-700/50 bg-surface-800/40 overflow-hidden">
+            <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center flex-shrink-0 shadow-lg shadow-black/20`}>
+                <Icon size={18} className="text-white" />
             </div>
-            <div>
+            <div className="min-w-0">
                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest">{label}</p>
-                <p className="text-2xl font-black text-white">{value}</p>
-                {sub && <p className="text-[10px] text-soft mt-0.5 font-medium">{sub}</p>}
+                <p className="text-xl font-black text-white">{value}</p>
+                {sub && <p className="text-[10px] text-soft mt-0.5 font-medium truncate">{sub}</p>}
             </div>
         </div>
     );

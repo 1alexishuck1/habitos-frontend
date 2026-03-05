@@ -44,10 +44,10 @@ export default function Layout() {
 
             {/* Main content — pushed right on desktop, padded top on mobile for the header bar */}
             <main
-                className="flex-1 lg:ml-56 lg:pt-0"
+                className="flex-1 lg:ml-56 lg:pt-0 overflow-x-hidden"
                 style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))' }}
             >
-                <div className="max-w-2xl mx-auto lg:py-8 lg:px-8">
+                <div className="max-w-2xl mx-auto lg:py-8 lg:px-8 overflow-hidden">
                     <Outlet />
                 </div>
             </main>
