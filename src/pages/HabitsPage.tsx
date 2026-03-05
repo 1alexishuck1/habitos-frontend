@@ -166,8 +166,8 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
     const [selectedCat, setSelectedCat] = useState<string | null>(null);
     const [selectedTemplate, setSelectedTemplate] = useState<HabitTemplate | null>(null);
     const [form, setForm] = useState({
-        name: '', type: 'CHECK', frequencyType: 'DAILY',
-        frequencyDays: [] as number[], description: '', category: '',
+        name: '', type: 'CHECK' as 'CHECK' | 'COUNTER', frequencyType: 'DAILY',
+        frequencyDays: [] as number[], description: '', category: '', goalValue: 1
     });
     const [loading, setLoading] = useState(false);
 
@@ -197,6 +197,7 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
             frequencyDays: [],
             description: tpl.description ?? '',
             category: tpl.category ?? '',
+            goalValue: 1,
         });
     };
 
@@ -208,6 +209,7 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
                 templateId: selectedTemplate.id,
                 name: selectedTemplate.name,
                 type: selectedTemplate.type,
+                goalValue: selectedTemplate.type === 'COUNTER' ? form.goalValue : undefined,
                 frequencyType: form.frequencyType,
                 frequencyDays: form.frequencyType === 'SPECIFIC_DAYS' ? form.frequencyDays : undefined,
                 description: selectedTemplate.description ?? '',
@@ -221,7 +223,8 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
         e.preventDefault();
         setLoading(true);
         try {
-            const { data } = await habitApi.create({ ...form, category: form.category || undefined });
+            const payload = { ...form, category: form.category || undefined, goalValue: form.type === 'COUNTER' ? form.goalValue : undefined };
+            const { data } = await habitApi.create(payload);
             onCreate(data);
         } finally { setLoading(false); }
     };
@@ -308,6 +311,13 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
                                     <p className="text-[11px] text-muted">{selectedTemplate.description}</p>
                                 </div>
                             </div>
+
+                            {selectedTemplate.type === 'COUNTER' && (
+                                <div>
+                                    <label className="block text-sm text-soft mb-1.5">Cantidad Objetivo</label>
+                                    <input type="number" min="1" className="input" value={form.goalValue} onChange={e => setForm({ ...form, goalValue: parseInt(e.target.value) || 1 })} required />
+                                </div>
+                            )}
 
                             <FrequencyPicker />
 
@@ -397,11 +407,18 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
 
                         <div>
                             <label className="block text-sm text-soft mb-1.5">Tipo</label>
-                            <select className="input" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+                            <select className="input" value={form.type} onChange={e => setForm({ ...form, type: e.target.value as 'CHECK' | 'COUNTER' })}>
                                 <option value="CHECK">{t('habits.type.CHECK')}</option>
                                 <option value="COUNTER">{t('habits.type.COUNTER')}</option>
                             </select>
                         </div>
+
+                        {form.type === 'COUNTER' && (
+                            <div>
+                                <label className="block text-sm text-soft mb-1.5">Cantidad Objetivo</label>
+                                <input type="number" min="1" className="input" value={form.goalValue} onChange={e => setForm({ ...form, goalValue: parseInt(e.target.value) || 1 })} required />
+                            </div>
+                        )}
 
                         <FrequencyPicker />
 

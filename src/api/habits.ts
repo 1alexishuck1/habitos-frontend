@@ -18,6 +18,7 @@ export const habitApi = {
         name: string;
         description?: string;
         type: string;
+        goalValue?: number;
         frequencyType: string;
         frequencyDays?: number[];
         category?: string;

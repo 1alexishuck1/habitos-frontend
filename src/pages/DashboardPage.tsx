@@ -52,7 +52,7 @@ function HabitRow({ habit, onCheck, onUncheck, disabled, onCounterClick }: { hab
                     onClick={() => !disabled && onCounterClick(habit)}
                     className={`badge ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-95 cursor-pointer'} ${habit.todayCompleted ? 'bg-primary-500/20 text-primary-400 font-bold' : 'bg-surface-700 text-white'}`}
                 >
-                    {habit.todayValue ?? 0}
+                    {habit.todayValue ?? 0} / {habit.goalValue ?? 1}
                 </button>
             )}
         </div>
@@ -426,7 +426,12 @@ export default function DashboardPage() {
                                     {counterHabit.template?.icon ?? getCategoryMeta(resolveCategory(counterHabit)).emoji}
                                 </div>
                                 <h3 className="text-xl font-bold text-white tracking-tight">{counterHabit.name}</h3>
-                                <p className="text-sm text-soft mt-1">¿Cuánto sumar hoy?</p>
+                                <div className="text-sm text-soft mt-2">
+                                    <p>¿Cuánto sumar hoy?</p>
+                                    <p className="text-xs opacity-70 mt-1">
+                                        Llevás {counterHabit.todayValue ?? 0} de {counterHabit.goalValue ?? 1}
+                                    </p>
+                                </div>
                             </div>
 
                             <div className="flex-1 flex flex-col justify-center items-center px-6 pb-6 pt-2 z-10">

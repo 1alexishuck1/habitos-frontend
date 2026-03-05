@@ -29,6 +29,7 @@ export interface Habit {
     name: string;
     description: string | null;
     type: HabitType;
+    goalValue?: number;
     frequencyType: FrequencyType;
     frequencyDays: number[];
     isPaused: boolean;
