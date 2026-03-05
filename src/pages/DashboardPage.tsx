@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Circle, Dumbbell, Award, Bell, X } from 'lucide-react';
+import { CheckCircle2, Circle, Dumbbell, Award, Bell, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { habitApi } from '@/api/habits';
 import { taskApi } from '@/api/tasks';
 import { gymApi, loadDoneSet, type WorkoutDay } from '@/api/gym';
@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 import { isPushSubscribed } from '@/services/pushNotifications';
 import { Habit, Task } from '@/types';
 import { CATEGORIES, resolveCategory, getCategoryMeta } from './HabitsPage';
-import { startOfWeek, addDays, format, isSameDay } from 'date-fns';
+import { addDays, format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 function HabitRow({ habit, onCheck, onUncheck, disabled, onCounterClick }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void; disabled?: boolean; onCounterClick: (habit: Habit) => void }) {
@@ -174,9 +174,22 @@ export default function DashboardPage() {
     const totalItems = habits.length + tasks.length;
     const completionPct = totalItems > 0 ? Math.round(((doneHabits + doneTasks) / totalItems) * 100) : 0;
 
-    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-    const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const weekDays = useMemo(() => {
+        const today = new Date();
+        return Array.from({ length: 60 }).map((_, i) => addDays(today, i - 30));
+    }, []);
+
     const isSelectedToday = isSameDay(selectedDate, new Date());
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            const selectedBtn = scrollRef.current.querySelector('[data-selected="true"]');
+            if (selectedBtn) {
+                selectedBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+        }
+    }, [selectedDate]);
 
     return (
         <div className="page-content animate-fade-in">
@@ -189,34 +202,57 @@ export default function DashboardPage() {
             </div>
 
             {/* Week Days Selector */}
-            <div className="flex justify-between items-center bg-surface-800/50 p-3 rounded-2xl mb-6 border border-surface-700/50">
-                {weekDays.map(day => {
-                    const isSelected = isSameDay(day, selectedDate);
-                    const isToday = isSameDay(day, new Date());
-                    const label = format(day, 'EEEEEE', { locale: es }).toUpperCase(); // L M X J V S D
-                    return (
-                        <button
-                            key={day.toISOString()}
-                            onClick={() => setSelectedDate(day)}
-                            className="flex flex-col items-center gap-1 transition-all active:scale-95"
-                        >
-                            <span className={`text-xs font-bold ${isSelected || isToday ? 'text-white' : 'text-white/40'}`}>
-                                {label}
-                            </span>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border-[3px] transition-all
-                                ${isSelected
-                                    ? 'bg-primary-500 border-primary-500 shadow-[0_0_12px_rgba(236,72,153,0.5)]'
-                                    : isToday
-                                        ? 'border-primary-500/50 text-white'
-                                        : 'border-surface-700/80 hover:border-surface-600'}`}
+            <div className="relative mb-6 group">
+                {/* Left Arrow (PC) */}
+                <button
+                    onClick={() => scrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' })}
+                    className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 w-8 h-8 rounded-full bg-surface-700 hover:bg-surface-600 items-center justify-center text-white z-10 shadow-lg border border-surface-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                    <ChevronLeft size={18} />
+                </button>
+
+                <div
+                    ref={scrollRef}
+                    className="flex gap-4 overflow-x-auto no-scrollbar bg-surface-800/50 p-3 rounded-2xl border border-surface-700/50 snap-x snap-mandatory"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                    {weekDays.map(day => {
+                        const isSelected = isSameDay(day, selectedDate);
+                        const isToday = isSameDay(day, new Date());
+                        const label = format(day, 'EEEEEE', { locale: es }).toUpperCase(); // L M X J V S D
+                        return (
+                            <button
+                                key={day.toISOString()}
+                                data-selected={isSelected}
+                                onClick={() => setSelectedDate(day)}
+                                className="flex flex-col items-center gap-1 transition-all active:scale-95 flex-shrink-0 snap-center min-w-[3rem]"
                             >
-                                <span className={`text-sm font-bold ${isSelected ? 'text-white' : isToday ? 'text-white' : 'text-white/40'}`}>
-                                    {format(day, 'd')}
+                                <span className={`text-xs font-bold ${isSelected || isToday ? 'text-white' : 'text-white/40'}`}>
+                                    {label}
                                 </span>
-                            </div>
-                        </button>
-                    );
-                })}
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-[3px] transition-all
+                                    ${isSelected
+                                        ? 'bg-primary-500 border-primary-500 shadow-[0_0_12px_rgba(236,72,153,0.5)]'
+                                        : isToday
+                                            ? 'border-primary-500/50 text-white'
+                                            : 'border-surface-700/80 hover:border-surface-600'}`}
+                                >
+                                    <span className={`text-sm font-bold ${isSelected ? 'text-white' : isToday ? 'text-white' : 'text-white/40'}`}>
+                                        {format(day, 'd')}
+                                    </span>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Right Arrow (PC) */}
+                <button
+                    onClick={() => scrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' })}
+                    className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 w-8 h-8 rounded-full bg-surface-700 hover:bg-surface-600 items-center justify-center text-white z-10 shadow-lg border border-surface-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                    <ChevronRight size={18} />
+                </button>
             </div>
 
             {/* Push notification banner */}
