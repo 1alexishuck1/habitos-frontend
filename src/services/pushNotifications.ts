@@ -72,19 +72,42 @@ export async function initPushNotifications(): Promise<void> {
 
     try {
         const vapidKey = await getVapidPublicKey();
+        if (!vapidKey) {
+            console.warn('[push] No VAPID public key from server');
+            return;
+        }
+
+        const appServerKey = urlBase64ToUint8Array(vapidKey);
 
         // Check if already subscribed
         const existing = await registration.pushManager.getSubscription();
         if (existing) {
-            // Re-send to server in case it was lost on a new device/browser
-            await sendSubscriptionToServer(existing);
-            return;
+            // Verify the subscription uses the current VAPID key
+            const existingKey = existing.options?.applicationServerKey;
+            let needsRefresh = false;
+
+            if (existingKey) {
+                const existingArray = new Uint8Array(existingKey);
+                if (existingArray.length !== appServerKey.length ||
+                    existingArray.some((v, i) => v !== appServerKey[i])) {
+                    needsRefresh = true;
+                }
+            }
+
+            if (needsRefresh) {
+                console.info('[push] VAPID key changed, re-subscribing...');
+                await existing.unsubscribe();
+            } else {
+                // Re-send to server in case it was lost on a new device/browser
+                await sendSubscriptionToServer(existing);
+                return;
+            }
         }
 
         // Create new subscription
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(vapidKey).buffer as ArrayBuffer,
+            applicationServerKey: appServerKey.buffer as ArrayBuffer,
         });
 
         await sendSubscriptionToServer(subscription);
