@@ -55,6 +55,21 @@ export const listFriends = () =>
 export const getFriendActivity = (friendId: string) =>
     api.get<ActivityItem[]>(`/friends/${friendId}/activity`).then(r => r.data);
 
+export interface FriendHabitToday {
+    id: string;
+    name: string;
+    type: string;
+    category: string;
+    frequencyType: string;
+    frequencyDays: number[];
+    todayCompleted: boolean;
+    currentStreak: number;
+    templateId?: string;
+}
+
+export const getFriendTodayHabits = (friendId: string) =>
+    api.get<FriendHabitToday[]>(`/friends/${friendId}/habits-today`).then(r => r.data);
+
 export const removeFriend = (friendId: string) =>
     api.delete(`/friends/${friendId}`).then(r => r.data);
 

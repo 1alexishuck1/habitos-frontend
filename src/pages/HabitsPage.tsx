@@ -38,27 +38,30 @@ function HabitCard({ habit, onLog, onPause, onDelete }: {
 }) {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
-    const maxVal = Math.max(habit.maxStreak, habit.currentStreak ?? 0);
+    const streak = habit.currentStreak ?? 0;
+    const maxVal = Math.max(habit.maxStreak ?? 0, streak);
+    const done = habit.todayCompleted === true;
 
     return (
-        <div className="card mb-3 animate-slide-up">
+        <div className={`card mb-3 animate-slide-up transition-all ${done ? 'border-l-2 border-l-accent-green/60' : ''}`}>
             <div className="flex items-start gap-3">
                 {/* Icon + name */}
                 <div className="flex-1 cursor-pointer" onClick={() => setOpen(!open)}>
                     <div className="flex items-center gap-2">
                         <span className="text-xl">{habit.template?.icon ?? getCategoryMeta(resolveCategory(habit)).emoji}</span>
                         <div>
-                            <p className="font-semibold text-white text-sm">{habit.name}</p>
+                            <p className={`font-semibold text-sm ${done ? 'text-soft line-through' : 'text-white'}`}>{habit.name}</p>
                             <p className="text-[10px] font-bold text-muted uppercase tracking-widest">{t(`habits.frequency.${habit.frequencyType}`)}</p>
                         </div>
+                        {done && <span className="text-xs ml-1">✅</span>}
                     </div>
                 </div>
 
                 {/* Streak current */}
                 <div className="text-right">
-                    <div className="flex items-center gap-1 text-accent-amber">
+                    <div className={`flex items-center gap-1 ${streak > 0 ? 'text-accent-amber' : 'text-muted'}`}>
                         <Flame size={14} />
-                        <span className="text-sm font-black">{habit.currentStreak ?? 0}</span>
+                        <span className="text-sm font-black">{streak}</span>
                     </div>
                 </div>
             </div>
@@ -66,7 +69,7 @@ function HabitCard({ habit, onLog, onPause, onDelete }: {
             {/* Expanded actions */}
             {open && (
                 <div className="mt-3 pt-3 border-t border-surface-700/50 flex gap-2 flex-wrap animate-fade-in">
-                    {!habit.isPaused && !habit.todayCompleted && (
+                    {!habit.isPaused && !done && (
                         <button
                             onClick={() => onLog(habit.id)}
                             className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
@@ -88,7 +91,7 @@ function HabitCard({ habit, onLog, onPause, onDelete }: {
                 <div className="flex justify-between items-end mb-1.5">
                     <div className="flex items-center gap-1 text-[9px] font-bold text-muted uppercase">
                         <span>Actual:</span>
-                        <span className="text-accent-amber">{habit.currentStreak ?? 0}d</span>
+                        <span className={streak > 0 ? 'text-accent-amber' : ''}>{streak}d</span>
                     </div>
                     <div className="flex items-center gap-1 text-[9px] font-bold text-muted uppercase">
                         <Trophy size={10} className="opacity-40" />
@@ -99,7 +102,7 @@ function HabitCard({ habit, onLog, onPause, onDelete }: {
                 <div className="h-1.5 rounded-full bg-surface-700/50 overflow-hidden border border-white/5">
                     <div
                         className="h-full rounded-full bg-gradient-to-r from-accent-amber via-primary-400 to-accent-green shadow-[0_0_8px_rgba(251,191,36,0.1)] transition-all duration-1000 ease-out"
-                        style={{ width: `${maxVal > 0 ? ((habit.currentStreak ?? 0) / maxVal) * 100 : 0}%` }}
+                        style={{ width: `${maxVal > 0 ? (streak / maxVal) * 100 : 0}%` }}
                     />
                 </div>
             </div>

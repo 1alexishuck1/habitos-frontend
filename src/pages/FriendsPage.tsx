@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
 import { onSSE } from '@/services/sseConnection';
 import { useTranslation } from 'react-i18next';
+import { habitApi } from '@/api/habits';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,12 +57,18 @@ function ActivityRow({ item }: { item: ActivityItem }) {
 
 // ─── Friend card ─────────────────────────────────────────────────────────────
 
-function FriendCard({ entry, onRemove, onMotivate }: { entry: FriendEntry; onRemove: (id: string) => void; onMotivate: (f: FriendEntry) => void }) {
+function FriendCard({ entry, onRemove, onMotivate, onCopyHabit }: {
+    entry: FriendEntry;
+    onRemove: (id: string) => void;
+    onMotivate: (f: FriendEntry, prefilledMsg?: string) => void;
+    onCopyHabit: (habit: friendsApi.FriendHabitToday) => void;
+}) {
     const { t } = useTranslation();
     const { friend, stats, since } = entry;
     const initials = friend.name.slice(0, 2).toUpperCase();
     const [expanded, setExpanded] = useState(false);
     const [activity, setActivity] = useState<ActivityItem[]>([]);
+    const [friendHabits, setFriendHabits] = useState<friendsApi.FriendHabitToday[]>([]);
     const [actLoading, setActLoading] = useState(false);
     const [actLoaded, setActLoaded] = useState(false);
     const [confirmRemove, setConfirmRemove] = useState(false);
@@ -75,11 +82,16 @@ function FriendCard({ entry, onRemove, onMotivate }: { entry: FriendEntry; onRem
         if (next && !actLoaded) {
             setActLoading(true);
             try {
-                const data = await friendsApi.getFriendActivity(friend.id);
-                setActivity(Array.isArray(data) ? data : []);
+                const [actData, habitsData] = await Promise.all([
+                    friendsApi.getFriendActivity(friend.id),
+                    friendsApi.getFriendTodayHabits(friend.id),
+                ]);
+                setActivity(Array.isArray(actData) ? actData : []);
+                setFriendHabits(Array.isArray(habitsData) ? habitsData : []);
                 setActLoaded(true);
             } catch {
                 setActivity([]);
+                setFriendHabits([]);
             } finally {
                 setActLoading(false);
             }
@@ -128,7 +140,7 @@ function FriendCard({ entry, onRemove, onMotivate }: { entry: FriendEntry; onRem
                 </div>
             </div>
 
-            {/* Activity feed + remove button */}
+            {/* Expanded: habits today + activity + remove */}
             {expanded && (
                 <div className="activity-feed">
                     {actLoading && (
@@ -136,12 +148,62 @@ function FriendCard({ entry, onRemove, onMotivate }: { entry: FriendEntry; onRem
                             <Loader2 size={16} className="spin" /> {t('friends.loadingActivity')}
                         </div>
                     )}
-                    {!actLoading && activity.length === 0 && (
+
+                    {/* Friend's habits today */}
+                    {!actLoading && friendHabits.length > 0 && (
+                        <div className="mb-4">
+                            <p className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-2 px-1">
+                                Hábitos de hoy
+                            </p>
+                            <div className="space-y-1.5">
+                                {friendHabits.map(h => (
+                                    <div key={h.id} className={`flex items-center gap-2 p-2 rounded-xl transition-all ${h.todayCompleted ? 'bg-accent-green/10' : 'bg-surface-700/30'}`}>
+                                        <span className="text-sm">
+                                            {h.todayCompleted ? '✅' : '⭕'}
+                                        </span>
+                                        <span className={`flex-1 text-xs font-medium truncate ${h.todayCompleted ? 'text-soft line-through' : 'text-white'}`}>
+                                            {h.name}
+                                        </span>
+                                        {h.currentStreak > 0 && (
+                                            <span className="text-[10px] text-accent-amber font-bold">🔥{h.currentStreak}</span>
+                                        )}
+                                        {!h.todayCompleted && (
+                                            <button
+                                                className="text-[10px] font-bold text-primary-400 hover:text-primary-300 px-1.5 py-0.5 rounded-lg bg-primary-500/10 hover:bg-primary-500/20 transition-all"
+                                                onClick={() => onMotivate(entry, `¡Dale con "${h.name}"! Vos podés 💪`)}
+                                                title="Motivar"
+                                            >
+                                                ⚡
+                                            </button>
+                                        )}
+                                        <button
+                                            className="text-[10px] font-bold text-soft hover:text-white px-1.5 py-0.5 rounded-lg bg-surface-600/40 hover:bg-surface-600 transition-all"
+                                            onClick={() => onCopyHabit(h)}
+                                            title="Copiar hábito"
+                                        >
+                                            📋
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {!actLoading && activity.length === 0 && friendHabits.length === 0 && (
                         <p className="activity-empty">{t('friends.noActivity')}</p>
                     )}
-                    {!actLoading && activity.map(item => (
-                        <ActivityRow key={item.id} item={item} />
-                    ))}
+
+                    {/* Activity history */}
+                    {!actLoading && activity.length > 0 && (
+                        <div>
+                            <p className="text-[10px] font-black text-muted uppercase tracking-widest mb-2 px-1">
+                                Actividad reciente
+                            </p>
+                            {activity.map(item => (
+                                <ActivityRow key={item.id} item={item} />
+                            ))}
+                        </div>
+                    )}
 
                     {/* Remove friend */}
                     <div className="remove-friend-row">
@@ -563,8 +625,16 @@ export default function FriendsPage() {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
-    function handleMotivate(entry: FriendEntry) {
+    function handleMotivate(entry: FriendEntry, prefilledMsg?: string) {
         setMotivateEntry(entry);
+        if (prefilledMsg) {
+            // Send it directly to the friend
+            friendsApi.sendMessage(entry.friend.id, prefilledMsg).then(() => {
+                showToast(t('friends.messageSent', 'Mensaje enviado'));
+            }).catch(() => {
+                showToast(t('friends.errorSend', 'Error al enviar'));
+            });
+        }
     }
 
     async function handleSendMotivation(msg: string) {
@@ -575,6 +645,22 @@ export default function FriendsPage() {
             showToast(t('friends.messageSent'));
         } catch {
             showToast(t('friends.errorSend'));
+        }
+    }
+
+    async function handleCopyHabit(habit: friendsApi.FriendHabitToday) {
+        try {
+            await habitApi.create({
+                name: habit.name,
+                type: habit.type,
+                category: habit.category,
+                frequencyType: habit.frequencyType,
+                frequencyDays: habit.frequencyDays,
+                templateId: habit.templateId,
+            });
+            showToast(`¡Hábito "${habit.name}" agregado a tu lista!`);
+        } catch {
+            showToast('Error al copiar el hábito');
         }
     }
 
@@ -1219,6 +1305,7 @@ export default function FriendsPage() {
                                 entry={f}
                                 onRemove={handleRemoveFriend}
                                 onMotivate={handleMotivate}
+                                onCopyHabit={handleCopyHabit}
                             />
                         ))}
                     </div>
