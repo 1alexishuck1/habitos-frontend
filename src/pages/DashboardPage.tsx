@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Circle, Dumbbell, Award } from 'lucide-react';
+import { CheckCircle2, Circle, Dumbbell, Award, Bell, X } from 'lucide-react';
 import { habitApi } from '@/api/habits';
 import { taskApi } from '@/api/tasks';
 import { gymApi, todayKey, loadDoneSet, type WorkoutDay } from '@/api/gym';
 import { DailyReflectionCard } from '@/components/DailyReflectionCard';
 import { useAuthStore } from '@/store/authStore';
+import { isPushSubscribed } from '@/services/pushNotifications';
 import { Habit, Task } from '@/types';
 import { CATEGORIES, resolveCategory } from './HabitsPage';
 
@@ -73,6 +74,7 @@ export default function DashboardPage() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [gymDay, setGymDay] = useState<WorkoutDay | null>(null);
     const [loading, setLoading] = useState(true);
+    const [showPushBanner, setShowPushBanner] = useState(false);
 
     useEffect(() => {
         Promise.all([
@@ -85,6 +87,19 @@ export default function DashboardPage() {
             setGymDay(g);
         }).finally(() => setLoading(false));
     }, []);
+
+    // Check push notification status
+    useEffect(() => {
+        if (sessionStorage.getItem('push_banner_dismissed')) return;
+        isPushSubscribed().then(subscribed => {
+            if (!subscribed) setShowPushBanner(true);
+        });
+    }, []);
+
+    const dismissPushBanner = () => {
+        setShowPushBanner(false);
+        sessionStorage.setItem('push_banner_dismissed', '1');
+    };
 
     const handleHabitCheck = async (id: string) => {
         try {
@@ -119,6 +134,25 @@ export default function DashboardPage() {
                     <p className="text-sm text-muted mt-0.5">{new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
                 </div>
             </div>
+
+            {/* Push notification banner */}
+            {showPushBanner && (
+                <div className="mb-4 rounded-2xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-surface-800 p-3.5 flex items-start gap-3 animate-fade-in">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                        <Bell size={18} className="text-amber-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white">Activá las notificaciones</p>
+                        <p className="text-xs text-soft mt-0.5">No te pierdas recordatorios ni mensajes de tus amigos.</p>
+                        <Link to="/settings" className="inline-block mt-2 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors">
+                            Ir a Configuración →
+                        </Link>
+                    </div>
+                    <button onClick={dismissPushBanner} className="text-white/30 hover:text-white/60 transition-colors flex-shrink-0 p-1">
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
 
             {/* Daily summary card (Reactive) */}
             <div className="card mb-6 bg-gradient-to-br from-primary-600/20 to-surface-800 border-primary-500/20 overflow-hidden relative">

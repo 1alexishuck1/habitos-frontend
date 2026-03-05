@@ -136,3 +136,20 @@ export async function unsubscribePush(): Promise<void> {
         body: JSON.stringify({ endpoint }),
     });
 }
+
+/**
+ * Check if push notifications are currently active (permission granted + subscription exists).
+ */
+export async function isPushSubscribed(): Promise<boolean> {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+    if (Notification.permission !== 'granted') return false;
+
+    try {
+        const reg = await navigator.serviceWorker.getRegistration('/sw.js');
+        if (!reg) return false;
+        const sub = await reg.pushManager.getSubscription();
+        return !!sub;
+    } catch {
+        return false;
+    }
+}
