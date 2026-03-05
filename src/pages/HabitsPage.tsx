@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Flame, Pause, Play, Trash2, ChevronRight, Trophy } from 'lucide-react';
+import { Plus, Flame, Trash2, ChevronRight, Trophy } from 'lucide-react';
 import { habitApi } from '@/api/habits';
 import { Habit, HabitTemplate } from '@/types';
 import { useHabitStore } from '@/store/habitStore';
@@ -30,7 +30,7 @@ export function resolveCategory(habit: Habit): string {
 
 // ─── HabitCard ────────────────────────────────────────────────────────────────
 
-function HabitCard({ habit, onLog, onPause, onDelete }: {
+function HabitCard({ habit, onLog, onDelete }: {
     habit: Habit;
     onLog: (id: string) => void;
     onPause: (id: string) => void;
@@ -77,9 +77,9 @@ function HabitCard({ habit, onLog, onPause, onDelete }: {
                             <Plus size={13} /> {habit.type === 'COUNTER' ? '+1' : t('habits.completed')}
                         </button>
                     )}
-                    <button onClick={() => onPause(habit.id)} className="btn-ghost text-xs py-1.5 px-3 flex items-center gap-1.5">
+                    {/* <button onClick={() => onPause(habit.id)} className="btn-ghost text-xs py-1.5 px-3 flex items-center gap-1.5">
                         {habit.isPaused ? <><Play size={13} /> {t('habits.resume')}</> : <><Pause size={13} /> {t('habits.pause')}</>}
-                    </button>
+                    </button> */}
                     <button onClick={() => onDelete(habit.id)} className="btn-danger text-xs py-1.5 px-3 flex items-center gap-1.5">
                         <Trash2 size={13} /> {t('common.delete')}
                     </button>

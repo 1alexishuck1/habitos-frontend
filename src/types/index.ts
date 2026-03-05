@@ -10,6 +10,16 @@ export interface User {
     name: string;
     timezone: string;
     createdAt: string;
+    experience: number;
+    level: number;
+}
+
+export interface ExperienceLog {
+    id: string;
+    userId: string;
+    amount: number;
+    reason: string;
+    createdAt: string;
 }
 
 export interface HabitTemplate {

@@ -11,6 +11,8 @@ import { Habit, Task } from '@/types';
 import { CATEGORIES, resolveCategory, getCategoryMeta } from './HabitsPage';
 import { addDays, format, isSameDay, isBefore, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { authApi } from '@/api/auth';
+import { ExperienceLog } from '@/types';
 
 function HabitRow({ habit, onCheck, onUncheck, disabled, onCounterClick }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void; disabled?: boolean; onCounterClick: (habit: Habit) => void }) {
     return (
@@ -88,11 +90,12 @@ function TaskRow({ task, onStatus, disabled }: { task: Task; onStatus: (id: stri
 
 export default function DashboardPage() {
     const { t } = useTranslation();
-    const user = useAuthStore((s) => s.user);
+    const { user, refreshUser } = useAuthStore(s => ({ user: s.user, refreshUser: s.refreshUser }));
 
     const [habits, setHabits] = useState<Habit[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [gymDay, setGymDay] = useState<WorkoutDay | null>(null);
+    const [xpLogs, setXpLogs] = useState<ExperienceLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [showPushBanner, setShowPushBanner] = useState(false);
 
@@ -108,10 +111,12 @@ export default function DashboardPage() {
             habitApi.getToday(dateStr),
             taskApi.getToday(dateStr),
             gymApi.getDay(dayOfWeekKey).catch(() => null),
-        ]).then(([h, ta, g]) => {
+            authApi.experienceLogs().catch(() => ({ data: [] })),
+        ]).then(([h, ta, g, xp]) => {
             setHabits(h.data);
             setTasks(ta.data);
             setGymDay(g);
+            setXpLogs(xp.data || []);
         }).finally(() => setLoading(false));
     }, [dateStr]);
 
@@ -144,6 +149,8 @@ export default function DashboardPage() {
                 currentStreak: data.currentStreak,
                 maxStreak: data.maxStreak
             } : h));
+            refreshUser();
+            authApi.experienceLogs().then(r => setXpLogs(r.data)).catch(() => { });
         } catch { /* handled */ }
     };
 
@@ -152,6 +159,8 @@ export default function DashboardPage() {
         try {
             await habitApi.log(id, { value: 1, dateStr });
             setHabits(prev => prev.map(h => h.id === id ? { ...h, todayCompleted: true, todayValue: (h.todayValue ?? 0) + 1 } : h));
+            refreshUser();
+            authApi.experienceLogs().then(r => setXpLogs(r.data)).catch(() => { });
         } catch { /* handled by api layer */ }
     };
 
@@ -203,7 +212,12 @@ export default function DashboardPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <h1 className="text-xl font-bold text-white">Hola, {user?.name?.split(' ')[0]} 👋</h1>
+                    <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                        Hola, {user?.name?.split(' ')[0]} 👋
+                        <div className="badge border border-primary-500/50 bg-primary-500/20 text-primary-400 font-black px-2 py-0.5 text-xs">
+                            Nvl. {user?.level ?? 1}
+                        </div>
+                    </h1>
                     <p className="text-sm text-muted mt-0.5">{format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}</p>
                 </div>
             </div>
@@ -342,6 +356,39 @@ export default function DashboardPage() {
                     </Link>
                 );
             })()}
+
+            {/* Experience Section */}
+            <div className="card mb-6 bg-surface-800">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                            <span className="text-primary-400">⚡</span> Tu Progreso
+                        </h2>
+                        <p className="text-xs text-soft mt-0.5">Nivel {user?.level ?? 1}</p>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-sm font-bold text-white">{(user?.experience ?? 0) % 100} / 100 XP</span>
+                    </div>
+                </div>
+                <div className="h-2 rounded-full bg-surface-700/50 overflow-hidden mb-4 border border-white/5">
+                    <div className="h-full rounded-full bg-gradient-to-r from-primary-600 via-primary-400 to-accent-amber transition-all duration-1000 ease-out"
+                        style={{ width: `${(user?.experience ?? 0) % 100}%` }} />
+                </div>
+
+                {/* Logs */}
+                <div className="space-y-2 mt-4 max-h-[160px] overflow-y-auto no-scrollbar">
+                    {xpLogs.length === 0 ? (
+                        <p className="text-xs text-soft text-center py-2">No hay experiencia ganada aún.</p>
+                    ) : (
+                        xpLogs.filter(l => isSameDay(new Date(l.createdAt), selectedDate)).map(log => (
+                            <div key={log.id} className="flex justify-between items-center py-2 border-b border-surface-700/30 last:border-0">
+                                <span className="text-xs text-soft">{log.reason}</span>
+                                <span className="text-xs font-bold text-accent-amber">+{log.amount} XP</span>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
 
             {loading ? (
                 <div className="text-center py-12 text-muted animate-pulse-soft">{t('common.loading')}</div>

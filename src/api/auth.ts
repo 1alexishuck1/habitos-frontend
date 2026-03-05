@@ -18,4 +18,7 @@ export const authApi = {
 
     me: () =>
         api.get<User>('/auth/me'),
+
+    experienceLogs: () =>
+        api.get<import('@/types').ExperienceLog[]>('/auth/me/experience'),
 };
