@@ -508,7 +508,7 @@ function ChatModal({
                     <div className="flex flex-wrap gap-2">
                         {MOTIVATION_MESSAGES.map((msg, i) => {
                             const isLastMessageMine = history.length > 0 && history[history.length - 1].senderId === currentUser?.id;
-                            const disabled = sending || isLastMessageMine;
+                            const disabled = sending || (isLastMessageMine && !isSpecialChat);
                             return (
                                 <button
                                     key={i}
