@@ -71,15 +71,16 @@ export default function StatsPage() {
     };
 
     return (
-        <div className="page-content animate-fade-in pb-24">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-black text-white italic tracking-tight uppercase">Estadísticas</h1>
-                <div className="flex bg-surface-800 p-1 rounded-xl border border-surface-700">
+        <div className="page-content animate-fade-in">
+            {/* Header — stacks on mobile */}
+            <div className="mb-4">
+                <h1 className="text-xl font-black text-white italic tracking-tight uppercase mb-3">Estadísticas</h1>
+                <div className="flex bg-surface-800 p-1 rounded-xl border border-surface-700 overflow-x-auto no-scrollbar">
                     {(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as Period[]).map(p => (
                         <button
                             key={p}
                             onClick={() => setPeriod(p)}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-tighter transition-all ${period === p ? 'bg-primary-500 text-white shadow-lg' : 'text-soft hover:bg-surface-700'}`}
+                            className={`flex-1 min-w-0 px-2 py-1.5 rounded-lg text-[10px] font-black tracking-tighter transition-all whitespace-nowrap ${period === p ? 'bg-primary-500 text-white shadow-lg' : 'text-soft hover:bg-surface-700'}`}
                         >
                             {periodLabels[p].toUpperCase()}
                         </button>
@@ -87,8 +88,8 @@ export default function StatsPage() {
                 </div>
             </div>
 
-            {/* Sub Tabs */}
-            <div className="flex gap-2 mb-8 border-b border-surface-700/50 pb-4">
+            {/* Sub Tabs — wraps on mobile */}
+            <div className="flex gap-1.5 mb-6 border-b border-surface-700/50 pb-3 overflow-x-auto no-scrollbar">
                 {[
                     { id: 'GENERAL', label: 'Resumen', icon: LayoutDashboard },
                     { id: 'HABITS', label: 'Hábitos', icon: Activity },
@@ -97,7 +98,7 @@ export default function StatsPage() {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as Tab)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border-2 ${activeTab === tab.id
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border-2 whitespace-nowrap ${activeTab === tab.id
                             ? 'bg-primary-500/10 border-primary-500 text-primary-400'
                             : 'bg-transparent border-transparent text-soft hover:bg-surface-800'}`}
                     >
@@ -109,23 +110,23 @@ export default function StatsPage() {
 
             <div className={loading ? 'opacity-50 pointer-events-none' : ''}>
                 {activeTab === 'GENERAL' && summary && (
-                    <div className="space-y-6 animate-fade-in">
+                    <div className="space-y-4 animate-fade-in">
                         {/* Today special view */}
                         {period === 'DAILY' ? (
                             <>
-                                {/* Big progress ring-style card */}
+                                {/* Big progress card */}
                                 <div className="card bg-gradient-to-br from-primary-600/10 to-surface-800 border-primary-500/20 overflow-hidden relative">
-                                    <p className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-4">Progreso de hoy</p>
-                                    <div className="flex items-end justify-between gap-4 mb-4">
+                                    <p className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-3">Progreso de hoy</p>
+                                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
                                         <div>
-                                            <span className="text-5xl font-black text-white tabular-nums">{summary.completionRate}%</span>
+                                            <span className="text-4xl sm:text-5xl font-black text-white tabular-nums">{summary.completionRate}%</span>
                                             <p className="text-sm text-soft mt-1">
                                                 {summary.completionRate === 100 && summary.habitsTotal + summary.tasksTotal > 0
                                                     ? '¡Todo completo! 🎉'
                                                     : `${(summary.habitsDone ?? 0) + (summary.tasksDone ?? 0)} de ${(summary.habitsTotal ?? 0) + (summary.tasksTotal ?? 0)} completados`}
                                             </p>
                                         </div>
-                                        <div className="text-right space-y-1">
+                                        <div className="flex gap-3 sm:flex-col sm:text-right sm:gap-1">
                                             <p className="text-xs text-soft">
                                                 <span className="text-white font-bold">{summary.habitsDone ?? 0}/{summary.habitsTotal ?? 0}</span> hábitos
                                             </p>
@@ -141,16 +142,16 @@ export default function StatsPage() {
                                                 ? 'bg-accent-green shadow-[0_0_12px_rgba(34,211,160,0.4)]'
                                                 : 'bg-gradient-to-r from-primary-500 to-accent-green'
                                                 }`}
-                                            style={{ width: `${summary.completionRate}%` }}
+                                            style={{ width: `${Math.min(summary.completionRate, 100)}%` }}
                                         />
                                     </div>
-                                    <div className="absolute bottom-0 right-0 text-[80px] opacity-[0.04] font-black leading-none select-none">
+                                    <div className="absolute bottom-0 right-0 text-[60px] sm:text-[80px] opacity-[0.04] font-black leading-none select-none pointer-events-none">
                                         {summary.completionRate}%
                                     </div>
                                 </div>
 
                                 {/* Habit + Task mini cards */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-3">
                                     <StatCard
                                         label="Hábitos"
                                         value={`${summary.habitsDone ?? 0}/${summary.habitsTotal ?? 0}`}
@@ -168,7 +169,7 @@ export default function StatsPage() {
                                 </div>
                             </>
                         ) : (
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                                 <StatCard
                                     label="Completado"
                                     value={`${summary.completionRate}%`}
@@ -191,7 +192,7 @@ export default function StatsPage() {
                                 <p className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-3">Insights Clave</p>
                                 {summary.highlights.map((h: string, i: number) => (
                                     <p key={i} className="text-sm text-soft leading-relaxed flex items-start gap-3 mb-2 last:mb-0">
-                                        <span className="text-primary-400">✨</span> {h}
+                                        <span className="text-primary-400 flex-shrink-0">✨</span> {h}
                                     </p>
                                 ))}
                             </div>
@@ -200,18 +201,18 @@ export default function StatsPage() {
                 )}
 
                 {activeTab === 'HABITS' && (
-                    <div className="space-y-6 animate-fade-in">
+                    <div className="space-y-4 animate-fade-in">
                         {habitChartData.length > 0 && (
                             <div className="card">
-                                <div className="flex items-center justify-between mb-6">
-                                    <p className="text-xs font-bold text-white uppercase tracking-widest">Consistencia de Hábitos</p>
-                                    <span className="text-[10px] font-medium text-muted">Afluencia semanal</span>
+                                <div className="flex items-center justify-between mb-4">
+                                    <p className="text-xs font-bold text-white uppercase tracking-widest">Consistencia</p>
+                                    <span className="text-[10px] font-medium text-muted">% semanal</span>
                                 </div>
-                                <ResponsiveContainer width="100%" height={160}>
-                                    <BarChart data={habitChartData} barSize={32}>
-                                        <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                                <ResponsiveContainer width="100%" height={140}>
+                                    <BarChart data={habitChartData} barSize={24}>
+                                        <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 600 }} axisLine={false} tickLine={false} />
                                         <YAxis hide domain={[0, 100]} />
-                                        <Bar dataKey="pct" radius={[8, 8, 0, 0]}>
+                                        <Bar dataKey="pct" radius={[6, 6, 0, 0]}>
                                             {habitChartData.map((entry: any, i: number) => (
                                                 <Cell key={i} fill={entry.pct >= 80 ? '#22d3a0' : entry.pct >= 50 ? '#38bdf8' : '#475569'} />
                                             ))}
@@ -222,7 +223,7 @@ export default function StatsPage() {
                         )}
 
                         <div className="space-y-3">
-                            <p className="text-[10px] font-black text-muted uppercase tracking-widest px-1">Rachas Mundiales</p>
+                            <p className="text-[10px] font-black text-muted uppercase tracking-widest px-1">Rachas</p>
                             {streaks.length === 0 ? (
                                 <p className="text-muted text-sm text-center py-8">{t('common.noData')}</p>
                             ) : (
@@ -232,22 +233,20 @@ export default function StatsPage() {
                                         const maxVal = Math.max(s.maxStreak, s.currentStreak);
                                         return (
                                             <div key={s.id} className="card border-surface-700/50 bg-surface-800/20">
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <span className="text-3xl filter drop-shadow-md">{s.icon ?? '⭐'}</span>
-                                                    <div className="flex-1">
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <span className="text-2xl flex-shrink-0">{s.icon ?? '⭐'}</span>
+                                                    <div className="flex-1 min-w-0">
                                                         <p className="text-sm font-bold text-white truncate">{s.name}</p>
-                                                        {s.isPaused && <span className="badge bg-surface-700 text-white/40 text-[9px] mt-1">PAUSADO</span>}
+                                                        {s.isPaused && <span className="badge bg-surface-700 text-white/40 text-[9px] mt-0.5">PAUSADO</span>}
                                                     </div>
-                                                    <div className="text-right flex flex-col items-end">
-                                                        <div className="flex items-center gap-1.5 text-accent-amber">
-                                                            <span className="text-[9px] font-black opacity-40">ACTUAL</span>
-                                                            <Flame size={14} />
-                                                            <span className="text-xl font-black leading-none">{s.currentStreak}</span>
+                                                    <div className="text-right flex-shrink-0">
+                                                        <div className="flex items-center gap-1 text-accent-amber">
+                                                            <Flame size={13} />
+                                                            <span className="text-lg font-black leading-none">{s.currentStreak}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1.5 text-soft mt-1">
-                                                            <span className="text-[8px] font-black opacity-30">RÉCORD</span>
-                                                            <Trophy size={11} className="opacity-30" />
-                                                            <span className="text-xs font-bold">{maxVal}</span>
+                                                        <div className="flex items-center gap-1 text-soft mt-0.5">
+                                                            <Trophy size={10} className="opacity-30" />
+                                                            <span className="text-[10px] font-bold">{maxVal}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -266,21 +265,21 @@ export default function StatsPage() {
                 )}
 
                 {activeTab === 'TASKS' && summary && (
-                    <div className="space-y-6 animate-fade-in">
+                    <div className="space-y-4 animate-fade-in">
                         <div className="card">
-                            <p className="text-xs font-bold text-white uppercase tracking-widest mb-6">Por Categoría</p>
-                            <div className="space-y-5">
+                            <p className="text-xs font-bold text-white uppercase tracking-widest mb-4">Por Categoría</p>
+                            <div className="space-y-4">
                                 {summary.tasksByCategory?.length === 0 ? (
                                     <p className="text-muted text-center py-8">No hay tareas este periodo</p>
                                 ) : (
                                     summary.tasksByCategory.map((cat: any) => (
                                         <div key={cat.name}>
-                                            <div className="flex justify-between items-center mb-2">
+                                            <div className="flex justify-between items-center mb-1.5">
                                                 <span className="text-sm font-bold text-white flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-primary-500" />
-                                                    {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
+                                                    <div className="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0" />
+                                                    <span className="truncate">{cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}</span>
                                                 </span>
-                                                <span className="text-[11px] font-bold text-soft">{cat.done} / {cat.total}</span>
+                                                <span className="text-[11px] font-bold text-soft flex-shrink-0 ml-2">{cat.done} / {cat.total}</span>
                                             </div>
                                             <div className="h-2 rounded-full bg-surface-700/50 overflow-hidden p-[1px]">
                                                 <div
@@ -296,14 +295,14 @@ export default function StatsPage() {
                             </div>
                         </div>
 
-                        <div className="card bg-accent-purple/5 border-accent-purple/10 flex items-center gap-4">
-                            <div className="p-3 bg-accent-purple/20 rounded-2xl text-accent-purple">
-                                <ListTodo size={24} />
+                        <div className="card bg-accent-purple/5 border-accent-purple/10 flex items-start gap-3">
+                            <div className="p-2.5 bg-accent-purple/20 rounded-xl text-accent-purple flex-shrink-0">
+                                <ListTodo size={20} />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 <p className="text-[10px] font-bold text-accent-purple/60 uppercase tracking-widest">Eficiencia Total</p>
-                                <p className="text-lg font-black text-white">
-                                    {summary.completionRate}% de las tareas completadas
+                                <p className="text-base font-black text-white">
+                                    {summary.completionRate}% completadas
                                 </p>
                             </div>
                         </div>

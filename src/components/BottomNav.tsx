@@ -53,13 +53,13 @@ export default function MobileMenu() {
                 style={{ paddingTop: 'env(safe-area-inset-top)' }}
             >
                 <div className="h-14 flex items-center justify-between px-4">
-                    {/* Brand */}
-                    <div className="flex items-center gap-2">
+                    {/* Brand — links to home */}
+                    <NavLink to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
                         <div className="w-7 h-7 rounded-lg bg-primary-500/20 flex items-center justify-center">
                             <Flame size={14} className="text-primary-400" />
                         </div>
                         <span className="text-sm font-bold text-white">Hábitos</span>
-                    </div>
+                    </NavLink>
 
                     {/* Hamburger / Close toggle — with badge if pending requests */}
                     <button
