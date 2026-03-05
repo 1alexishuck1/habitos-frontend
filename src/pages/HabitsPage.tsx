@@ -46,7 +46,7 @@ function HabitCard({ habit, onLog, onPause, onDelete }: {
                 {/* Icon + name */}
                 <div className="flex-1 cursor-pointer" onClick={() => setOpen(!open)}>
                     <div className="flex items-center gap-2">
-                        <span className="text-xl">{habit.template?.icon ?? '⭐'}</span>
+                        <span className="text-xl">{habit.template?.icon ?? getCategoryMeta(resolveCategory(habit)).emoji}</span>
                         <div>
                             <p className="font-semibold text-white text-sm">{habit.name}</p>
                             <p className="text-[10px] font-bold text-muted uppercase tracking-widest">{t(`habits.frequency.${habit.frequencyType}`)}</p>

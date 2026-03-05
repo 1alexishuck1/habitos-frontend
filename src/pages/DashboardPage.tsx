@@ -9,7 +9,7 @@ import { DailyReflectionCard } from '@/components/DailyReflectionCard';
 import { useAuthStore } from '@/store/authStore';
 import { isPushSubscribed } from '@/services/pushNotifications';
 import { Habit, Task } from '@/types';
-import { CATEGORIES, resolveCategory } from './HabitsPage';
+import { CATEGORIES, resolveCategory, getCategoryMeta } from './HabitsPage';
 
 
 function HabitRow({ habit, onCheck }: { habit: Habit; onCheck: (id: string) => void }) {
@@ -26,7 +26,7 @@ function HabitRow({ habit, onCheck }: { habit: Habit; onCheck: (id: string) => v
             </button>
             <div className="flex-1 min-w-0">
                 <p className={`font-medium text-sm truncate ${habit.todayCompleted ? 'line-through text-soft' : 'text-white'}`}>
-                    {habit.template?.icon} {habit.name}
+                    {habit.template?.icon ?? getCategoryMeta(resolveCategory(habit)).emoji} {habit.name}
                 </p>
                 {habit.currentStreak! > 0 && (
                     <p className="text-[11px] text-accent-amber mt-0.5">🔥 {habit.currentStreak} días</p>
