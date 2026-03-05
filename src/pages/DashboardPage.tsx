@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 import { isPushSubscribed } from '@/services/pushNotifications';
 import { Habit, Task } from '@/types';
 import { CATEGORIES, resolveCategory, getCategoryMeta } from './HabitsPage';
-import { addDays, format, isSameDay } from 'date-fns';
+import { addDays, format, isSameDay, isBefore, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 function HabitRow({ habit, onCheck, onUncheck, disabled, onCounterClick }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void; disabled?: boolean; onCounterClick: (habit: Habit) => void }) {
@@ -219,25 +219,26 @@ export default function DashboardPage() {
                     {weekDays.map(day => {
                         const isSelected = isSameDay(day, selectedDate);
                         const isToday = isSameDay(day, new Date());
+                        const isPast = isBefore(day, startOfDay(new Date()));
                         const label = format(day, 'EEEEEE', { locale: es }).toUpperCase(); // L M X J V S D
                         return (
                             <button
                                 key={day.toISOString()}
                                 data-selected={isSelected}
                                 onClick={() => setSelectedDate(day)}
-                                className="flex flex-col items-center gap-1 transition-all active:scale-95 flex-shrink-0 snap-center min-w-[3rem]"
+                                className={`flex flex-col items-center gap-1 transition-all active:scale-95 flex-shrink-0 snap-center min-w-[3rem] ${!isSelected && isPast ? 'opacity-40 hover:opacity-100' : ''}`}
                             >
                                 <span className={`text-xs font-bold ${isSelected || isToday ? 'text-white' : 'text-white/40'}`}>
                                     {label}
                                 </span>
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-[3px] transition-all
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ring-0 transition-all border-[3px]
                                     ${isSelected
-                                        ? 'bg-primary-500 border-primary-500 shadow-[0_0_12px_rgba(236,72,153,0.5)]'
+                                        ? 'bg-primary-500 border-primary-500 shadow-[0_0_12px_rgba(236,72,153,0.6)]'
                                         : isToday
-                                            ? 'border-primary-500/50 text-white'
+                                            ? 'bg-primary-500/20 border-primary-500/80 shadow-[0_0_10px_rgba(236,72,153,0.2)]'
                                             : 'border-surface-700/80 hover:border-surface-600'}`}
                                 >
-                                    <span className={`text-sm font-bold ${isSelected ? 'text-white' : isToday ? 'text-white' : 'text-white/40'}`}>
+                                    <span className={`text-sm font-bold ${isSelected || isToday ? 'text-white' : 'text-white/50'}`}>
                                         {format(day, 'd')}
                                     </span>
                                 </div>
