@@ -132,11 +132,18 @@ export default function DashboardPage() {
     const [counterValue, setCounterValue] = useState<number>(0);
 
     const handleCounterSubmit = async () => {
-        if (!counterHabit || counterValue <= 0) return;
+        if (!counterHabit || counterValue === 0) return;
+        const delta = counterValue;
         setCounterHabit(null);
         try {
-            await habitApi.log(counterHabit.id, { value: counterValue, dateStr });
-            setHabits(prev => prev.map(h => h.id === counterHabit.id ? { ...h, todayCompleted: true, todayValue: (h.todayValue ?? 0) + counterValue } : h));
+            const { data } = await habitApi.log(counterHabit.id, { value: delta, dateStr });
+            setHabits(prev => prev.map(h => h.id === counterHabit.id ? {
+                ...h,
+                todayValue: data.totalValue,
+                todayCompleted: data.completed,
+                currentStreak: data.currentStreak,
+                maxStreak: data.maxStreak
+            } : h));
         } catch { /* handled */ }
     };
 
@@ -427,7 +434,7 @@ export default function DashboardPage() {
                                 </div>
                                 <h3 className="text-xl font-bold text-white tracking-tight">{counterHabit.name}</h3>
                                 <div className="text-sm text-soft mt-2">
-                                    <p>¿Cuánto sumar hoy?</p>
+                                    <p>¿Qué querés registrar hoy?</p>
                                     <p className="text-xs opacity-70 mt-1">
                                         Llevás {counterHabit.todayValue ?? 0} de {counterHabit.goalValue ?? 1}
                                     </p>
@@ -437,13 +444,13 @@ export default function DashboardPage() {
                             <div className="flex-1 flex flex-col justify-center items-center px-6 pb-6 pt-2 z-10">
                                 <div className="flex items-center gap-6 mb-6">
                                     <button
-                                        onClick={() => setCounterValue(Math.max(1, counterValue - 1))}
+                                        onClick={() => setCounterValue(counterValue - 1)}
                                         className="w-12 h-12 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-2xl font-bold transition-all active:scale-95 border border-surface-600/50"
                                     >
                                         -
                                     </button>
-                                    <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-accent-amber w-24 text-center tabular-nums leading-none">
-                                        {counterValue}
+                                    <span className={`text-5xl font-black tabular-nums leading-none w-24 text-center ${counterValue >= 0 ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-accent-amber' : 'text-red-400'}`}>
+                                        {counterValue > 0 ? `+${counterValue}` : counterValue}
                                     </span>
                                     <button
                                         onClick={() => setCounterValue(counterValue + 1)}
@@ -452,16 +459,29 @@ export default function DashboardPage() {
                                         +
                                     </button>
                                 </div>
-                                <div className="flex gap-2 justify-center w-full max-w-[220px]">
-                                    {[1, 5, 10].map(val => (
-                                        <button
-                                            key={val}
-                                            onClick={() => setCounterValue(counterValue + val)}
-                                            className="flex-1 py-1.5 bg-surface-700/50 hover:bg-surface-600 rounded-lg text-xs font-bold text-soft transition-colors active:scale-95 border border-surface-600/30"
-                                        >
-                                            +{val}
-                                        </button>
-                                    ))}
+                                <div className="space-y-2 w-full max-w-[220px]">
+                                    <div className="flex gap-2 justify-center">
+                                        {[1, 5, 10].map(val => (
+                                            <button
+                                                key={`plus-${val}`}
+                                                onClick={() => setCounterValue(counterValue + val)}
+                                                className="flex-1 py-1.5 bg-primary-500/10 hover:bg-primary-500/20 rounded-lg text-xs font-bold text-primary-400 transition-colors active:scale-95 border border-primary-500/20"
+                                            >
+                                                +{val}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-2 justify-center">
+                                        {[1, 5, 10].map(val => (
+                                            <button
+                                                key={`minus-${val}`}
+                                                onClick={() => setCounterValue(counterValue - val)}
+                                                className="flex-1 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-lg text-xs font-bold text-red-400 transition-colors active:scale-95 border border-red-500/20"
+                                            >
+                                                -{val}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
