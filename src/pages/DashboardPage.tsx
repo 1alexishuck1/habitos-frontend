@@ -12,21 +12,34 @@ import { CATEGORIES, resolveCategory, getCategoryMeta } from './HabitsPage';
 import { startOfWeek, addDays, format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-function HabitRow({ habit, onCheck, onUncheck, disabled }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void; disabled?: boolean }) {
+function HabitRow({ habit, onCheck, onUncheck, disabled, onCounterClick }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void; disabled?: boolean; onCounterClick: (habit: Habit) => void }) {
     return (
-        <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${habit.todayCompleted ? 'opacity-60' : ''} ${disabled ? 'opacity-50' : ''}`}>
-            <button
-                disabled={disabled}
-                onClick={() => !disabled && (habit.todayCompleted ? onUncheck(habit.id) : onCheck(habit.id, !!habit.todayCompleted))}
-                className={`flex-shrink-0 transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-90'} ${habit.todayCompleted ? 'text-accent-green' : 'text-white/20 hover:text-primary-400'}`}
-            >
-                {habit.todayCompleted
-                    ? <CheckCircle2 size={24} className={disabled ? '' : "animate-scale-in"} />
-                    : <Circle size={24} />
-                }
-            </button>
-            <div className="flex-1 min-w-0">
-                <p className={`font-medium text-sm truncate ${habit.todayCompleted ? 'line-through text-soft' : 'text-white'}`}>
+        <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${habit.todayCompleted && habit.type !== 'COUNTER' ? 'opacity-60' : ''} ${disabled ? 'opacity-50' : ''}`}>
+            {habit.type === 'COUNTER' ? (
+                <button
+                    disabled={disabled}
+                    onClick={() => !disabled && onCounterClick(habit)}
+                    className={`flex-shrink-0 transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-90'} ${habit.todayCompleted ? 'text-accent-green' : 'text-white/20 hover:text-primary-400'}`}
+                >
+                    {habit.todayCompleted
+                        ? <CheckCircle2 size={24} className={disabled ? '' : "animate-scale-in"} />
+                        : <Circle size={24} />
+                    }
+                </button>
+            ) : (
+                <button
+                    disabled={disabled}
+                    onClick={() => !disabled && (habit.todayCompleted ? onUncheck(habit.id) : onCheck(habit.id, !!habit.todayCompleted))}
+                    className={`flex-shrink-0 transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-90'} ${habit.todayCompleted ? 'text-accent-green' : 'text-white/20 hover:text-primary-400'}`}
+                >
+                    {habit.todayCompleted
+                        ? <CheckCircle2 size={24} className={disabled ? '' : "animate-scale-in"} />
+                        : <Circle size={24} />
+                    }
+                </button>
+            )}
+            <div className="flex-1 min-w-0" onClick={() => !disabled && habit.type === 'COUNTER' && onCounterClick(habit)}>
+                <p className={`font-medium text-sm truncate ${habit.todayCompleted && habit.type !== 'COUNTER' ? 'line-through text-soft' : 'text-white'} ${habit.type === 'COUNTER' ? 'cursor-pointer' : ''}`}>
                     {habit.template?.icon ?? getCategoryMeta(resolveCategory(habit)).emoji} {habit.name}
                 </p>
                 {habit.currentStreak! > 0 && (
@@ -34,7 +47,13 @@ function HabitRow({ habit, onCheck, onUncheck, disabled }: { habit: Habit; onChe
                 )}
             </div>
             {habit.type === 'COUNTER' && (
-                <span className="badge bg-surface-700 text-white">{habit.todayValue ?? 0}</span>
+                <button
+                    disabled={disabled}
+                    onClick={() => !disabled && onCounterClick(habit)}
+                    className={`badge ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-95 cursor-pointer'} ${habit.todayCompleted ? 'bg-primary-500/20 text-primary-400 font-bold' : 'bg-surface-700 text-white'}`}
+                >
+                    {habit.todayValue ?? 0}
+                </button>
             )}
         </div>
     );
@@ -107,6 +126,18 @@ export default function DashboardPage() {
     const dismissPushBanner = () => {
         setShowPushBanner(false);
         sessionStorage.setItem('push_banner_dismissed', '1');
+    };
+
+    const [counterHabit, setCounterHabit] = useState<Habit | null>(null);
+    const [counterValue, setCounterValue] = useState<number>(0);
+
+    const handleCounterSubmit = async () => {
+        if (!counterHabit || counterValue <= 0) return;
+        setCounterHabit(null);
+        try {
+            await habitApi.log(counterHabit.id, { value: counterValue, dateStr });
+            setHabits(prev => prev.map(h => h.id === counterHabit.id ? { ...h, todayCompleted: true, todayValue: (h.todayValue ?? 0) + counterValue } : h));
+        } catch { /* handled */ }
     };
 
     const handleHabitCheck = async (id: string, completed: boolean) => {
@@ -274,7 +305,7 @@ export default function DashboardPage() {
                 <>
                     {/* Habits block — grouped by category */}
                     {habits.length > 0 && (() => {
-                        const visibleHabits = pendingHabits > 0 ? habits.filter(h => !h.todayCompleted) : habits;
+                        const visibleHabits = habits;
 
                         // Build category groups (preserving CATEGORIES order)
                         const groups: { meta: typeof CATEGORIES[0]; habits: Habit[] }[] = [];
@@ -311,7 +342,10 @@ export default function DashboardPage() {
                                             </div>
                                         )}
                                         {group.map(h => (
-                                            <HabitRow key={h.id} habit={h} onCheck={handleHabitCheck} onUncheck={handleHabitUncheck} disabled={!isSelectedToday} />
+                                            <HabitRow key={h.id} habit={h} onCheck={handleHabitCheck} onUncheck={handleHabitUncheck} disabled={!isSelectedToday} onCounterClick={(habit) => {
+                                                setCounterHabit(habit);
+                                                setCounterValue(1);
+                                            }} />
                                         ))}
                                     </div>
                                 ))}
@@ -328,7 +362,7 @@ export default function DashboardPage() {
                                     {doneTasks}/{tasks.length}
                                 </span>
                             </div>
-                            {(pendingTasks > 0 ? tasks.filter(t => t.status !== 'DONE') : tasks).map(t => (
+                            {tasks.map(t => (
                                 <TaskRow key={t.id} task={t} onStatus={handleTaskStatus} disabled={!isSelectedToday} />
                             ))}
                         </section>
@@ -343,6 +377,64 @@ export default function DashboardPage() {
             )}
 
             {/* Removed DailyReflectionCard from here */}
+
+            {/* Counter Modal */}
+            {counterHabit && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setCounterHabit(null)} />
+                    <div className="relative w-full max-w-[320px] bg-surface-800 rounded-3xl overflow-hidden shadow-2xl border border-surface-700 animate-slide-up flex flex-col p-[2px]">
+                        <div className="bg-surface-800 rounded-[22px] flex flex-col">
+                            <div className="p-6 text-center relative z-10">
+                                <div className="w-16 h-16 bg-primary-500/10 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 border border-primary-500/20 shadow-[inset_0_2px_10px_rgba(236,72,153,0.1)]">
+                                    {counterHabit.template?.icon ?? getCategoryMeta(resolveCategory(counterHabit)).emoji}
+                                </div>
+                                <h3 className="text-xl font-bold text-white tracking-tight">{counterHabit.name}</h3>
+                                <p className="text-sm text-soft mt-1">¿Cuánto sumar hoy?</p>
+                            </div>
+
+                            <div className="flex-1 flex flex-col justify-center items-center px-6 pb-6 pt-2 z-10">
+                                <div className="flex items-center gap-6 mb-6">
+                                    <button
+                                        onClick={() => setCounterValue(Math.max(1, counterValue - 1))}
+                                        className="w-12 h-12 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-2xl font-bold transition-all active:scale-95 border border-surface-600/50"
+                                    >
+                                        -
+                                    </button>
+                                    <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-accent-amber w-24 text-center tabular-nums leading-none">
+                                        {counterValue}
+                                    </span>
+                                    <button
+                                        onClick={() => setCounterValue(counterValue + 1)}
+                                        className="w-12 h-12 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-2xl font-bold transition-all active:scale-95 border border-surface-600/50"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <div className="flex gap-2 justify-center w-full max-w-[220px]">
+                                    {[1, 5, 10].map(val => (
+                                        <button
+                                            key={val}
+                                            onClick={() => setCounterValue(counterValue + val)}
+                                            className="flex-1 py-1.5 bg-surface-700/50 hover:bg-surface-600 rounded-lg text-xs font-bold text-soft transition-colors active:scale-95 border border-surface-600/30"
+                                        >
+                                            +{val}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 p-4 border-t border-surface-700/50 bg-surface-900/40 rounded-b-[22px] z-10 relative">
+                                <button onClick={() => setCounterHabit(null)} className="btn-ghost font-bold text-xs py-3 rounded-xl">
+                                    CANCELAR
+                                </button>
+                                <button onClick={handleCounterSubmit} className="btn-primary font-bold text-xs py-3 rounded-xl shadow-[0_4px_12px_rgba(236,72,153,0.3)]">
+                                    GUARDAR
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
