@@ -4,19 +4,19 @@ import { Link } from 'react-router-dom';
 import { CheckCircle2, Circle, Dumbbell, Award, Bell, X } from 'lucide-react';
 import { habitApi } from '@/api/habits';
 import { taskApi } from '@/api/tasks';
-import { gymApi, todayKey, loadDoneSet, type WorkoutDay } from '@/api/gym';
-import { DailyReflectionCard } from '@/components/DailyReflectionCard';
+import { gymApi, loadDoneSet, type WorkoutDay } from '@/api/gym';
 import { useAuthStore } from '@/store/authStore';
 import { isPushSubscribed } from '@/services/pushNotifications';
 import { Habit, Task } from '@/types';
 import { CATEGORIES, resolveCategory, getCategoryMeta } from './HabitsPage';
+import { startOfWeek, addDays, format, isSameDay } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-
-function HabitRow({ habit, onCheck }: { habit: Habit; onCheck: (id: string) => void }) {
+function HabitRow({ habit, onCheck, onUncheck }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void }) {
     return (
         <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${habit.todayCompleted ? 'opacity-60' : ''}`}>
             <button
-                onClick={() => !habit.todayCompleted && onCheck(habit.id)}
+                onClick={() => habit.todayCompleted ? onUncheck(habit.id) : onCheck(habit.id, !!habit.todayCompleted)}
                 className={`flex-shrink-0 transition-all active:scale-90 ${habit.todayCompleted ? 'text-accent-green' : 'text-white/20 hover:text-primary-400'}`}
             >
                 {habit.todayCompleted
@@ -76,17 +76,24 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [showPushBanner, setShowPushBanner] = useState(false);
 
+    // Default selectedDate is today
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const dateStr = selectedDate.toISOString().split('T')[0];
+
+    const dayOfWeekKey = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][selectedDate.getDay()] as any;
+
     useEffect(() => {
+        setLoading(true);
         Promise.all([
-            habitApi.getToday(),
-            taskApi.getToday(),
-            gymApi.getDay(todayKey()).catch(() => null),
+            habitApi.getToday(dateStr),
+            taskApi.getToday(dateStr),
+            gymApi.getDay(dayOfWeekKey).catch(() => null),
         ]).then(([h, ta, g]) => {
             setHabits(h.data);
             setTasks(ta.data);
             setGymDay(g);
         }).finally(() => setLoading(false));
-    }, []);
+    }, [dateStr]);
 
     // Check push notification status
     useEffect(() => {
@@ -101,17 +108,27 @@ export default function DashboardPage() {
         sessionStorage.setItem('push_banner_dismissed', '1');
     };
 
-    const handleHabitCheck = async (id: string) => {
+    const handleHabitCheck = async (id: string, completed: boolean) => {
+        if (completed) return;
         try {
-            await habitApi.log(id, { value: 1 });
+            await habitApi.log(id, { value: 1, dateStr });
             setHabits(prev => prev.map(h => h.id === id ? { ...h, todayCompleted: true, todayValue: (h.todayValue ?? 0) + 1 } : h));
         } catch { /* handled by api layer */ }
     };
 
+    const handleHabitUncheck = async (id: string) => {
+        try {
+            await habitApi.unlog(id, dateStr);
+            setHabits(prev => prev.map(h => h.id === id ? { ...h, todayCompleted: false, todayValue: Math.max(0, (h.todayValue ?? 1) - 1) } : h));
+        } catch { /* handled */ }
+    };
+
     const handleTaskStatus = async (id: string) => {
         const task = tasks.find(t => t.id === id)!;
-        const next = task.status === 'PENDING' ? 'IN_PROGRESS' : 'DONE';
+        const next = task.status === 'PENDING' ? 'IN_PROGRESS' : task.status === 'IN_PROGRESS' ? 'DONE' : 'PENDING';
         try {
+            // we update status locally
+            // since taskApi might not support rollback date, we just change status for now
             await taskApi.changeStatus(id, next);
             setTasks(prev => prev.map(t => t.id === id ? { ...t, status: next } : t));
         } catch { /* handled */ }
@@ -125,14 +142,48 @@ export default function DashboardPage() {
     const totalItems = habits.length + tasks.length;
     const completionPct = totalItems > 0 ? Math.round(((doneHabits + doneTasks) / totalItems) * 100) : 0;
 
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
+
     return (
         <div className="page-content animate-fade-in">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-2">
                 <div>
                     <h1 className="text-xl font-bold text-white">Hola, {user?.name?.split(' ')[0]} 👋</h1>
-                    <p className="text-sm text-muted mt-0.5">{new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                    <p className="text-sm text-muted mt-0.5">{format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}</p>
                 </div>
+            </div>
+
+            {/* Week Days Selector */}
+            <div className="flex justify-between items-center bg-surface-800/50 p-3 rounded-2xl mb-6 border border-surface-700/50">
+                {weekDays.map(day => {
+                    const isSelected = isSameDay(day, selectedDate);
+                    const isToday = isSameDay(day, new Date());
+                    const label = format(day, 'EEEEEE', { locale: es }).toUpperCase(); // L M X J V S D
+                    return (
+                        <button
+                            key={day.toISOString()}
+                            onClick={() => setSelectedDate(day)}
+                            className="flex flex-col items-center gap-1 transition-all active:scale-95"
+                        >
+                            <span className={`text-xs font-bold ${isSelected || isToday ? 'text-white' : 'text-white/40'}`}>
+                                {label}
+                            </span>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border-[3px] transition-all
+                                ${isSelected
+                                    ? 'bg-primary-500 border-primary-500 shadow-[0_0_12px_rgba(236,72,153,0.5)]'
+                                    : isToday
+                                        ? 'border-primary-500/50 text-white'
+                                        : 'border-surface-700/80 hover:border-surface-600'}`}
+                            >
+                                <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-transparent'}`}>
+                                    {isSelected ? format(day, 'd') : ''}
+                                </span>
+                            </div>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Push notification banner */}
@@ -178,7 +229,8 @@ export default function DashboardPage() {
 
             {/* Gym Motivation */}
             {gymDay && gymDay.exercises && gymDay.exercises.length > 0 && (() => {
-                const doneSet = loadDoneSet(todayKey());
+                const isSelectedToday = isSameDay(selectedDate, new Date());
+                const doneSet = isSelectedToday ? loadDoneSet(dayOfWeekKey) : new Set<string>();
                 const allDone = gymDay.exercises.every(e => doneSet.has(e.id));
                 const progress = `${doneSet.size}/${gymDay.exercises.length}`;
 
@@ -258,7 +310,7 @@ export default function DashboardPage() {
                                             </div>
                                         )}
                                         {group.map(h => (
-                                            <HabitRow key={h.id} habit={h} onCheck={handleHabitCheck} />
+                                            <HabitRow key={h.id} habit={h} onCheck={handleHabitCheck} onUncheck={handleHabitUncheck} />
                                         ))}
                                     </div>
                                 ))}
@@ -289,8 +341,7 @@ export default function DashboardPage() {
                 </>
             )}
 
-            {/* Daily Reflection */}
-            <DailyReflectionCard />
+            {/* Removed DailyReflectionCard from here */}
         </div>
     );
 }

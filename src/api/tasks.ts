@@ -7,8 +7,8 @@ export const taskApi = {
     getAll: (params?: { status?: TaskStatus; category?: string }) =>
         api.get<Task[]>('/tasks', { params }),
 
-    getToday: () =>
-        api.get<Task[]>('/tasks/today'),
+    getToday: (date?: string) =>
+        api.get<Task[]>('/tasks/today', { params: { date } }),
 
     create: (data: {
         title: string;
