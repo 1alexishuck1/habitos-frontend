@@ -12,15 +12,16 @@ import { CATEGORIES, resolveCategory, getCategoryMeta } from './HabitsPage';
 import { startOfWeek, addDays, format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-function HabitRow({ habit, onCheck, onUncheck }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void }) {
+function HabitRow({ habit, onCheck, onUncheck, disabled }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void; disabled?: boolean }) {
     return (
-        <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${habit.todayCompleted ? 'opacity-60' : ''}`}>
+        <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${habit.todayCompleted ? 'opacity-60' : ''} ${disabled ? 'opacity-50' : ''}`}>
             <button
-                onClick={() => habit.todayCompleted ? onUncheck(habit.id) : onCheck(habit.id, !!habit.todayCompleted)}
-                className={`flex-shrink-0 transition-all active:scale-90 ${habit.todayCompleted ? 'text-accent-green' : 'text-white/20 hover:text-primary-400'}`}
+                disabled={disabled}
+                onClick={() => !disabled && (habit.todayCompleted ? onUncheck(habit.id) : onCheck(habit.id, !!habit.todayCompleted))}
+                className={`flex-shrink-0 transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-90'} ${habit.todayCompleted ? 'text-accent-green' : 'text-white/20 hover:text-primary-400'}`}
             >
                 {habit.todayCompleted
-                    ? <CheckCircle2 size={24} className="animate-scale-in" />
+                    ? <CheckCircle2 size={24} className={disabled ? '' : "animate-scale-in"} />
                     : <Circle size={24} />
                 }
             </button>
@@ -39,12 +40,12 @@ function HabitRow({ habit, onCheck, onUncheck }: { habit: Habit; onCheck: (id: s
     );
 }
 
-function TaskRow({ task, onStatus }: { task: Task; onStatus: (id: string) => void }) {
+function TaskRow({ task, onStatus, disabled }: { task: Task; onStatus: (id: string) => void; disabled?: boolean }) {
     const done = task.status === 'DONE';
     const inProgress = task.status === 'IN_PROGRESS';
     return (
-        <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${done ? 'opacity-50' : ''}`}>
-            <button onClick={() => onStatus(task.id)} className="flex-shrink-0 active:scale-90 transition-transform">
+        <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${done ? 'opacity-50' : ''} ${disabled ? 'opacity-50' : ''}`}>
+            <button disabled={disabled} onClick={() => !disabled && onStatus(task.id)} className={`flex-shrink-0 ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-90 transition-transform'}`}>
                 {done
                     ? <CheckCircle2 size={20} className="text-accent-green" />
                     : inProgress
@@ -144,6 +145,7 @@ export default function DashboardPage() {
 
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
+    const isSelectedToday = isSameDay(selectedDate, new Date());
 
     return (
         <div className="page-content animate-fade-in">
@@ -177,8 +179,8 @@ export default function DashboardPage() {
                                         ? 'border-primary-500/50 text-white'
                                         : 'border-surface-700/80 hover:border-surface-600'}`}
                             >
-                                <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-transparent'}`}>
-                                    {isSelected ? format(day, 'd') : ''}
+                                <span className={`text-sm font-bold ${isSelected ? 'text-white' : isToday ? 'text-white' : 'text-white/40'}`}>
+                                    {format(day, 'd')}
                                 </span>
                             </div>
                         </button>
@@ -229,7 +231,6 @@ export default function DashboardPage() {
 
             {/* Gym Motivation */}
             {gymDay && gymDay.exercises && gymDay.exercises.length > 0 && (() => {
-                const isSelectedToday = isSameDay(selectedDate, new Date());
                 const doneSet = isSelectedToday ? loadDoneSet(dayOfWeekKey) : new Set<string>();
                 const allDone = gymDay.exercises.every(e => doneSet.has(e.id));
                 const progress = `${doneSet.size}/${gymDay.exercises.length}`;
@@ -310,7 +311,7 @@ export default function DashboardPage() {
                                             </div>
                                         )}
                                         {group.map(h => (
-                                            <HabitRow key={h.id} habit={h} onCheck={handleHabitCheck} onUncheck={handleHabitUncheck} />
+                                            <HabitRow key={h.id} habit={h} onCheck={handleHabitCheck} onUncheck={handleHabitUncheck} disabled={!isSelectedToday} />
                                         ))}
                                     </div>
                                 ))}
@@ -328,7 +329,7 @@ export default function DashboardPage() {
                                 </span>
                             </div>
                             {(pendingTasks > 0 ? tasks.filter(t => t.status !== 'DONE') : tasks).map(t => (
-                                <TaskRow key={t.id} task={t} onStatus={handleTaskStatus} />
+                                <TaskRow key={t.id} task={t} onStatus={handleTaskStatus} disabled={!isSelectedToday} />
                             ))}
                         </section>
                     )}
