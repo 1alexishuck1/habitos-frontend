@@ -91,12 +91,12 @@ function HabitCard({ habit, onLog, onPause, onDelete }: {
                 <div className="flex justify-between items-end mb-1.5">
                     <div className="flex items-center gap-1 text-[9px] font-bold text-muted uppercase">
                         <span>Actual:</span>
-                        <span className={streak > 0 ? 'text-accent-amber' : ''}>{streak}d</span>
+                        <span className={streak > 0 ? 'text-accent-amber' : ''}>{streak} DÍAS</span>
                     </div>
                     <div className="flex items-center gap-1 text-[9px] font-bold text-muted uppercase">
                         <Trophy size={10} className="opacity-40" />
                         <span>Récord:</span>
-                        <span>{maxVal}d</span>
+                        <span>{maxVal} DÍAS</span>
                     </div>
                 </div>
                 <div className="h-1.5 rounded-full bg-surface-700/50 overflow-hidden border border-white/5">
