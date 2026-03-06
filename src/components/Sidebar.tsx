@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Flame, LogOut, ChevronDown, ChevronRight } from 'lucide-react';
+import { LogOut, ChevronDown, ChevronRight, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
 import { NAV_CATEGORIES } from '@/constants/navigation';
@@ -56,14 +56,18 @@ export default function Sidebar() {
 
     return (
         <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-60 bg-surface-800 border-r border-surface-700/50 z-40 py-6">
-            {/* Brand */}
-            <div className="flex items-center gap-2.5 px-6 mb-8 hover:opacity-80 transition-opacity cursor-pointer" onClick={() => navigate('/')}>
-                <div className="w-9 h-9 rounded-xl bg-primary-500/20 flex items-center justify-center shadow-lg shadow-primary-500/5">
-                    <Flame size={18} className="text-primary-400" />
+            {/* User Info Header */}
+            <div className="px-6 mb-8 flex items-center gap-3 group cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/settings')}>
+                <div className="w-10 h-10 rounded-xl bg-surface-700 flex items-center justify-center shadow-lg border border-surface-600/50">
+                    <UserIcon size={20} className="text-primary-400" />
                 </div>
-                <div>
-                    <p className="text-sm font-black text-white leading-none uppercase tracking-tight italic">Hábitos</p>
-                    <p className="text-[10px] text-white/30 font-medium">Tu día, tu ritmo</p>
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white truncate">{user?.name || 'Usuario'}</p>
+                    <div className="mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary-500/10 border border-primary-500/10">
+                        <span className="text-[9px] font-black text-primary-400 uppercase tracking-widest leading-none">
+                            Niv. {user?.level || 1}
+                        </span>
+                    </div>
                 </div>
             </div>
 

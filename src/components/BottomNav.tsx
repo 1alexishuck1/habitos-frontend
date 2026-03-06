@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-    Flame, Menu, X, LogOut, ChevronDown, ChevronRight
+    Flame, Menu, X, LogOut, ChevronDown, ChevronRight, User as UserIcon
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
@@ -121,14 +121,18 @@ export default function MobileMenu() {
                 style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))' }}
                 aria-label="Menú principal"
             >
-                {/* Brand inside drawer */}
-                <div className="flex items-center gap-3 px-6 pb-6 border-b border-surface-700/40">
-                    <div className="w-10 h-10 rounded-2xl bg-primary-500/20 flex items-center justify-center shadow-lg shadow-primary-500/5">
-                        <Flame size={18} className="text-primary-400" />
+                {/* User info inside drawer */}
+                <div className="flex items-center gap-4 px-6 pb-8 pt-4 border-b border-surface-700/40">
+                    <div className="w-12 h-12 rounded-2xl bg-surface-700 flex items-center justify-center shadow-lg border border-surface-600/50">
+                        <UserIcon size={22} className="text-primary-400" />
                     </div>
-                    <div>
-                        <p className="text-base font-black text-white italic tracking-tighter uppercase">Hábitos</p>
-                        <p className="text-xs text-soft font-medium">v1.2.0 • Premium</p>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-base font-bold text-white truncate">{user?.name || 'Usuario'}</p>
+                        <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full bg-primary-500/10 border border-primary-500/20">
+                            <span className="text-[10px] font-black text-primary-400 uppercase tracking-widest leading-none">
+                                Nivel {user?.level || 1}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
