@@ -17,6 +17,7 @@ import GymPage from '@/pages/GymPage';
 import SmokePage from '@/pages/smoke/SmokePage';
 import SmokeOnboardingPage from '@/pages/smoke/SmokeOnboardingPage';
 import SmokePanicPage from '@/pages/smoke/SmokePanicPage';
+import LandingPage from '@/pages/LandingPage';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
 import { initPushNotifications } from '@/services/pushNotifications';
@@ -62,24 +63,26 @@ export default function App() {
             <Analytics />
             <Routes>
                 {/* Public */}
+                <Route path="/landing" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
 
-                {/* Protected — wrapped in shell layout */}
-                <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-                    <Route index element={<DashboardPage />} />
-                    <Route path="habits" element={<HabitsPage />} />
-                    <Route path="tasks" element={<TasksPage />} />
-                    <Route path="progress" element={<ProgressPage />} />
-                    <Route path="stats" element={<StatsPage />} />
-                    <Route path="diary" element={<DiaryPage />} />
-                    <Route path="settings" element={<SettingsPage />} />
-                    <Route path="friends" element={<FriendsPage />} />
-                    <Route path="gym" element={<GymPage />} />
-                    <Route path="admin" element={<AdminPage />} />
-                    <Route path="smoke" element={<SmokePage />} />
-                    <Route path="smoke/onboarding" element={<SmokeOnboardingPage />} />
+                {/* Main conditional route */}
+                <Route path="/" element={isLoggedIn ? <Layout /> : <LandingPage />}>
+                    <Route index element={isLoggedIn ? <DashboardPage /> : <LandingPage />} />
+                    <Route path="habits" element={<ProtectedRoute><HabitsPage /></ProtectedRoute>} />
+                    <Route path="tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
+                    <Route path="progress" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
+                    <Route path="stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+                    <Route path="diary" element={<ProtectedRoute><DiaryPage /></ProtectedRoute>} />
+                    <Route path="settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                    <Route path="friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
+                    <Route path="gym" element={<ProtectedRoute><GymPage /></ProtectedRoute>} />
+                    <Route path="admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+                    <Route path="smoke" element={<ProtectedRoute><SmokePage /></ProtectedRoute>} />
+                    <Route path="smoke/onboarding" element={<ProtectedRoute><SmokeOnboardingPage /></ProtectedRoute>} />
                 </Route>
+
                 <Route path="/smoke/panic" element={<ProtectedRoute><SmokePanicPage /></ProtectedRoute>} />
 
 
