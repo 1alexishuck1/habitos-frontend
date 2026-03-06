@@ -23,7 +23,7 @@ export default function LandingPage() {
                         <a href="#stats" className="text-sm font-medium text-soft hover:text-white transition-colors">Progreso</a>
                         <a href="#social" className="text-sm font-medium text-soft hover:text-white transition-colors">Comunidad</a>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="hidden sm:flex items-center gap-4">
                         <button
                             onClick={() => navigate('/login')}
                             className="text-sm font-bold text-soft hover:text-white transition-colors"
@@ -62,14 +62,14 @@ export default function LandingPage() {
                         <div className="flex flex-col sm:flex-row gap-4 animate-slide-up delay-200">
                             <button
                                 onClick={() => navigate('/register')}
-                                className="group bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 text-white px-8 py-4 rounded-2xl text-lg font-black transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(14,165,233,0.3)] hover:shadow-[0_0_50px_rgba(14,165,233,0.5)]"
+                                className="group bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 text-white px-6 py-3 rounded-xl text-base font-black transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]"
                             >
                                 Registrarse gratis
-                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button
                                 onClick={() => navigate('/login')}
-                                className="bg-surface-800 hover:bg-surface-700 border border-surface-700/50 px-8 py-4 rounded-2xl text-lg font-bold transition-all hover:scale-105 active:scale-95"
+                                className="bg-surface-800 hover:bg-surface-700 border border-surface-700/50 px-6 py-3 rounded-xl text-base font-bold transition-all hover:scale-105 active:scale-95"
                             >
                                 Ver demostración
                             </button>
@@ -227,7 +227,7 @@ export default function LandingPage() {
                             </p>
                             <button
                                 onClick={() => navigate('/register')}
-                                className="bg-primary-500 hover:bg-primary-400 text-white px-8 py-4 rounded-2xl text-lg font-black transition-all hover:scale-105 active:scale-95 shadow-xl shadow-primary-500/20"
+                                className="bg-primary-500 hover:bg-primary-400 text-white px-6 py-3 rounded-xl text-base font-black transition-all hover:scale-105 active:scale-95 shadow-xl shadow-primary-500/20"
                             >
                                 Unirse a la comunidad
                             </button>
@@ -277,16 +277,16 @@ export default function LandingPage() {
                     <p className="text-xl text-soft mb-12 max-w-2xl mx-auto">
                         Miles de usuarios ya están mejorando su disciplina cada día. Unite hoy mismo y empezá a construir los hábitos que siempre soñaste.
                     </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <button
                             onClick={() => navigate('/register')}
-                            className="w-full sm:w-auto bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 text-white px-12 py-5 rounded-2xl text-xl font-black shadow-[0_0_40px_rgba(14,165,233,0.3)] hover:shadow-[0_0_60px_rgba(14,165,233,0.5)] transition-all hover:scale-105 active:scale-95"
+                            className="w-full sm:w-auto bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 text-white px-8 py-4 rounded-xl text-lg font-black shadow-[0_0_30px_rgba(14,165,233,0.3)] hover:shadow-[0_0_50px_rgba(14,165,233,0.5)] transition-all hover:scale-105 active:scale-95"
                         >
                             Crear mi cuenta ahora
                         </button>
                         <button
                             onClick={() => navigate('/login')}
-                            className="w-full sm:w-auto bg-surface-800 border border-surface-700 hover:bg-surface-700 px-12 py-5 rounded-2xl text-xl font-bold transition-all hover:scale-105 active:scale-95"
+                            className="w-full sm:w-auto bg-surface-800 border border-surface-700 hover:bg-surface-700 px-8 py-4 rounded-xl text-lg font-bold transition-all hover:scale-105 active:scale-95"
                         >
                             Iniciar sesión
                         </button>
