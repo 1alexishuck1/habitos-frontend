@@ -9,12 +9,13 @@ import { es } from 'date-fns/locale';
 
 export default function ProgressPage() {
     const { t } = useTranslation();
-    const { user } = useAuthStore(s => ({ user: s.user }));
+    const { user, refreshUser } = useAuthStore(s => ({ user: s.user, refreshUser: s.refreshUser }));
     const [xpLogs, setXpLogs] = useState<ExperienceLog[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         setLoading(true);
+        refreshUser();
         authApi.experienceLogs()
             .then(res => setXpLogs(res.data || []))
             .catch(() => { })
