@@ -62,7 +62,7 @@ export default function LandingPage() {
                         <div className="flex flex-col sm:flex-row gap-4 animate-slide-up delay-200">
                             <button
                                 onClick={() => navigate('/register')}
-                                className="group bg-white text-surface-950 px-8 py-4 rounded-2xl text-lg font-black transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3"
+                                className="group bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 text-white px-8 py-4 rounded-2xl text-lg font-black transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(14,165,233,0.3)] hover:shadow-[0_0_50px_rgba(14,165,233,0.5)]"
                             >
                                 Registrarse gratis
                                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -280,7 +280,7 @@ export default function LandingPage() {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                         <button
                             onClick={() => navigate('/register')}
-                            className="w-full sm:w-auto bg-white text-surface-900 px-12 py-5 rounded-2xl text-xl font-black shadow-2xl transition-all hover:scale-105 active:scale-95"
+                            className="w-full sm:w-auto bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 text-white px-12 py-5 rounded-2xl text-xl font-black shadow-[0_0_40px_rgba(14,165,233,0.3)] hover:shadow-[0_0_60px_rgba(14,165,233,0.5)] transition-all hover:scale-105 active:scale-95"
                         >
                             Crear mi cuenta ahora
                         </button>
