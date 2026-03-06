@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
     Home, Flame, CheckSquare, BarChart2, Book,
-    Settings, Users, Menu, X, LogOut, Dumbbell, Zap
+    Settings, Users, Menu, X, LogOut, Dumbbell, Zap, ShieldCheck
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
@@ -31,6 +31,13 @@ export default function MobileMenu() {
     const pendingCount = useFriendNotifStore((s) => s.pendingCount);
     const unreadMessages = useFriendNotifStore((s) => s.unreadMessages);
     const totalNotifs = pendingCount + unreadMessages.length;
+
+    const user = useAuthStore((s) => s.user);
+    const isAdmin = user?.id === '1c30001a-ba62-47f4-ad41-bbcdc137e221' && user?.email === 'huckalexis0@gmail.com';
+
+    const visibleItems = isAdmin
+        ? [...navItems, { to: '/admin', icon: ShieldCheck, tKey: 'Admin' }]
+        : navItems;
 
     // Close menu on route change
     useEffect(() => { setOpen(false); }, [location.pathname]);
@@ -126,7 +133,7 @@ export default function MobileMenu() {
 
                 {/* Nav links */}
                 <div className="flex flex-col gap-1 px-3 py-4 flex-1 overflow-y-auto">
-                    {navItems.map(({ to, icon: Icon, tKey }) => {
+                    {visibleItems.map(({ to, icon: Icon, tKey }) => {
                         const isFriends = to === '/friends';
                         const showBadge = isFriends && totalNotifs > 0;
                         return (
@@ -148,7 +155,7 @@ export default function MobileMenu() {
                                             )}
                                         </div>
                                         <span className={`text-sm ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                                            {t(tKey)}
+                                            {tKey === 'Admin' ? 'Admin' : t(tKey)}
                                         </span>
                                         {isActive && !showBadge && (
                                             <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-400" />

@@ -13,6 +13,7 @@ import DiaryPage from '@/pages/DiaryPage';
 import SettingsPage from '@/pages/SettingsPage';
 import FriendsPage from '@/pages/FriendsPage';
 import GymPage from '@/pages/GymPage';
+import AdminPage from '@/pages/AdminPage';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
 import { initPushNotifications } from '@/services/pushNotifications';
@@ -72,6 +73,7 @@ export default function App() {
                     <Route path="settings" element={<SettingsPage />} />
                     <Route path="friends" element={<FriendsPage />} />
                     <Route path="gym" element={<GymPage />} />
+                    <Route path="admin" element={<AdminPage />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />
