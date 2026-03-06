@@ -91,13 +91,15 @@ export default function ProgressPage() {
                                 <div className="space-y-2">
                                     {groupedLogs[dateStr].map(log => (
                                         <div key={log.id} className="flex justify-between items-center p-3 rounded-xl bg-surface-800/40 border border-surface-700/30">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-surface-700/50 flex items-center justify-center text-accent-amber">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-8 h-8 rounded-lg bg-surface-700/50 flex items-center justify-center text-accent-amber shrink-0">
                                                     <Zap size={14} />
                                                 </div>
-                                                <span className="text-sm font-medium text-white">{log.reason}</span>
+                                                <span className="text-sm font-medium text-white truncate text-left" title={log.reason}>
+                                                    {log.reason.replace(/^Hábito completado:\s*/, '').replace(/^Tarea completada:\s*/, '')}
+                                                </span>
                                             </div>
-                                            <span className="text-sm font-black text-accent-amber px-2 py-1 rounded-md bg-accent-amber/10">
+                                            <span className="text-sm font-black text-accent-amber px-2 py-1 rounded-md bg-accent-amber/10 shrink-0 ml-2">
                                                 +{log.amount} XP
                                             </span>
                                         </div>
