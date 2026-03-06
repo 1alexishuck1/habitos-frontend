@@ -15,7 +15,7 @@ import { es } from 'date-fns/locale';
 
 function HabitRow({ habit, onCheck, onUncheck, disabled, onCounterClick }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void; disabled?: boolean; onCounterClick: (habit: Habit) => void }) {
     return (
-        <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${habit.todayCompleted && habit.type !== 'COUNTER' ? 'opacity-60' : ''} ${disabled ? 'opacity-50' : ''}`}>
+        <div className={`flex items-center gap-3 py-3 border-b border-surface-700/40 last:border-0 ${habit.todayCompleted ? 'opacity-60' : ''} ${disabled ? 'opacity-50' : ''}`}>
             {habit.type === 'COUNTER' ? (
                 <button
                     disabled={disabled}
@@ -40,7 +40,7 @@ function HabitRow({ habit, onCheck, onUncheck, disabled, onCounterClick }: { hab
                 </button>
             )}
             <div className="flex-1 min-w-0" onClick={() => !disabled && habit.type === 'COUNTER' && onCounterClick(habit)}>
-                <p className={`font-medium text-sm truncate ${habit.todayCompleted && habit.type !== 'COUNTER' ? 'line-through text-soft' : 'text-white'} ${habit.type === 'COUNTER' ? 'cursor-pointer' : ''}`}>
+                <p className={`font-medium text-sm truncate ${habit.todayCompleted ? 'line-through text-soft' : 'text-white'} ${habit.type === 'COUNTER' ? 'cursor-pointer' : ''}`}>
                     {habit.template?.icon ?? getCategoryMeta(resolveCategory(habit)).emoji} {habit.name}
                 </p>
                 {habit.currentStreak! > 0 && (
