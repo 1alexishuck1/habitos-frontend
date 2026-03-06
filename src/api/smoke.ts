@@ -34,4 +34,5 @@ export const smokeApi = {
     createProfile: (data: Partial<SmokeProfile>) => client.post<SmokeProfile>('/smoke/profile', data),
     logSmoke: (data: { quantity: number; trigger?: string; comment?: string }) => client.post('/smoke/logs', data),
     logCraving: (data: { resisted: boolean; trigger?: string }) => client.post('/smoke/cravings', data),
+    deleteProfile: () => client.delete('/smoke/profile'),
 };

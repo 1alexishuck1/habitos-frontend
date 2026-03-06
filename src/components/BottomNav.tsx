@@ -2,26 +2,11 @@ import { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-    Home, Flame, CheckSquare, BarChart2, Book,
-    Settings, Users, Menu, X, LogOut, Dumbbell, Zap, ShieldCheck, Wind
+    Flame, Menu, X, LogOut, ChevronDown, ChevronRight
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
-
-// Mobile hamburger menu — replaces the overcrowded bottom nav bar
-
-const navItems = [
-    { to: '/', icon: Home, tKey: 'nav.today' },
-    { to: '/habits', icon: Flame, tKey: 'nav.habits' },
-    { to: '/tasks', icon: CheckSquare, tKey: 'nav.tasks' },
-    { to: '/progress', icon: Zap, tKey: 'nav.progress' },
-    { to: '/smoke', icon: Wind, tKey: 'nav.smoke' },
-    { to: '/stats', icon: BarChart2, tKey: 'nav.stats' },
-    { to: '/diary', icon: Book, tKey: 'nav.diary' },
-    { to: '/friends', icon: Users, tKey: 'nav.friends' },
-    { to: '/gym', icon: Dumbbell, tKey: 'nav.gym' },
-    { to: '/settings', icon: Settings, tKey: 'nav.settings' },
-];
+import { NAV_CATEGORIES } from '@/constants/navigation';
 
 export default function MobileMenu() {
     const { t } = useTranslation();
@@ -36,9 +21,12 @@ export default function MobileMenu() {
     const user = useAuthStore((s) => s.user);
     const isAdmin = user?.id === '1c30001a-ba62-47f4-ad41-bbcdc137e221' && user?.email === 'huckalexis0@gmail.com';
 
-    const visibleItems = isAdmin
-        ? [...navItems, { to: '/admin', icon: ShieldCheck, tKey: 'Admin' }]
-        : navItems;
+    // State for collapsible categories
+    const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+    const toggleCategory = (title: string) => {
+        setCollapsed(prev => ({ ...prev, [title]: !prev[title] }));
+    };
 
     // Close menu on route change
     useEffect(() => { setOpen(false); }, [location.pathname]);
@@ -62,29 +50,27 @@ export default function MobileMenu() {
                 style={{ paddingTop: 'env(safe-area-inset-top)' }}
             >
                 <div className="h-14 flex items-center justify-between px-4">
-                    {/* Brand — links to home */}
                     <NavLink to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-                        <div className="w-7 h-7 rounded-lg bg-primary-500/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center shadow-lg shadow-primary-500/5">
                             <Flame size={14} className="text-primary-400" />
                         </div>
-                        <span className="text-sm font-bold text-white">Hábitos</span>
+                        <span className="text-sm font-black text-white uppercase tracking-tighter italic">Hábitos</span>
                     </NavLink>
 
-                    {/* Hamburger / Close toggle — with badge if pending requests */}
                     <button
                         id="mobile-menu-toggle"
                         onClick={() => setOpen(!open)}
-                        className="relative w-9 h-9 flex items-center justify-center rounded-xl
+                        className="relative w-10 h-10 flex items-center justify-center rounded-xl
                                text-white/60 hover:text-white hover:bg-surface-700/60
-                               transition-all duration-150 active:scale-90"
+                               transition-all duration-150 active:scale-90 shadow-lg shadow-black/10 shadow-surface-950/20"
                         aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
                         aria-expanded={open}
                     >
-                        {open ? <X size={20} /> : <Menu size={20} />}
+                        {open ? <X size={22} className="text-accent-red" /> : <Menu size={22} />}
                         {!open && totalNotifs > 0 && (
                             <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5
                                             bg-accent-red rounded-full flex items-center justify-center
-                                            text-[9px] font-bold text-white leading-none">
+                                            text-[9px] font-bold text-white leading-none shadow-lg shadow-accent-red/20">
                                 {totalNotifs > 9 ? '9+' : totalNotifs}
                             </span>
                         )}
@@ -95,7 +81,7 @@ export default function MobileMenu() {
             {/* ── Backdrop ── */}
             {open && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+                    className="fixed inset-0 z-40 bg-black/70 backdrop-blur-md lg:hidden animate-fade-in"
                     onClick={() => setOpen(false)}
                     aria-hidden="true"
                 />
@@ -105,86 +91,94 @@ export default function MobileMenu() {
             <nav
                 className={`fixed top-0 right-0 bottom-0 z-50 w-72 max-w-[85vw]
                             bg-surface-800 border-l border-surface-700/50
-                            flex flex-col pb-safe
-                            transition-transform duration-300 ease-out lg:hidden
+                            flex flex-col pb-safe shadow-2xl
+                            transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden
                             ${open ? 'translate-x-0' : 'translate-x-full'}`}
                 style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))' }}
                 aria-label="Menú principal"
             >
-                {/* Close button inside drawer */}
-                <button
-                    onClick={() => setOpen(false)}
-                    className="absolute right-3 w-9 h-9 flex items-center justify-center
-                               rounded-xl text-white/40 hover:text-white hover:bg-surface-700/60 transition-all"
-                    style={{ top: 'calc(0.75rem + env(safe-area-inset-top))' }}
-                >
-                    <X size={18} />
-                </button>
-
                 {/* Brand inside drawer */}
-                <div className="flex items-center gap-2.5 px-5 pb-6 border-b border-surface-700/40">
-                    <div className="w-9 h-9 rounded-xl bg-primary-500/20 flex items-center justify-center">
-                        <Flame size={16} className="text-primary-400" />
+                <div className="flex items-center gap-3 px-6 pb-6 border-b border-surface-700/40">
+                    <div className="w-10 h-10 rounded-2xl bg-primary-500/20 flex items-center justify-center shadow-lg shadow-primary-500/5">
+                        <Flame size={18} className="text-primary-400" />
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-white leading-none">Hábitos</p>
-                        <p className="text-[10px] text-white/30">Tu día, tu ritmo</p>
+                        <p className="text-base font-black text-white italic tracking-tighter uppercase">Hábitos</p>
+                        <p className="text-xs text-soft font-medium">v1.2.0 • Premium</p>
                     </div>
                 </div>
 
-                {/* Nav links */}
-                <div className="flex flex-col gap-1 px-3 py-4 flex-1 overflow-y-auto">
-                    {visibleItems.map(({ to, icon: Icon, tKey }) => {
-                        const isFriends = to === '/friends';
-                        const showBadge = isFriends && totalNotifs > 0;
+                {/* Nav categories */}
+                <div className="flex flex-col px-4 py-6 flex-1 overflow-y-auto scrollbar-hide gap-8">
+                    {NAV_CATEGORIES.map((category) => {
+                        const isCollapsed = collapsed[category.title];
+                        const visibleItems = category.items.filter(item => !item.adminOnly || isAdmin);
+
+                        if (visibleItems.length === 0) return null;
+
                         return (
-                            <NavLink key={to} to={to} end={to === '/'}>
-                                {({ isActive }) => (
-                                    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150
-                                        ${isActive
-                                            ? 'bg-primary-500/15 text-primary-400'
-                                            : 'text-white/60 hover:text-white hover:bg-surface-700/50'
-                                        }`}>
-                                        <div className="relative">
-                                            <Icon size={19} strokeWidth={isActive ? 2.5 : 1.8} />
-                                            {showBadge && (
-                                                <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-3.5 px-0.5
-                                                                bg-accent-red rounded-full flex items-center justify-center
-                                                                text-[8px] font-bold text-white leading-none">
-                                                    {totalNotifs > 9 ? '9+' : totalNotifs}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <span className={`text-sm ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                                            {tKey === 'Admin' ? 'Admin' : t(tKey)}
-                                        </span>
-                                        {isActive && !showBadge && (
-                                            <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-400" />
-                                        )}
-                                        {showBadge && (
-                                            <span className="ml-auto text-[10px] font-bold text-accent-red">
-                                                {totalNotifs} nuev{totalNotifs !== 1 ? 'as' : 'a'}
-                                            </span>
-                                        )}
+                            <div key={category.title} className="flex flex-col gap-2">
+                                <button
+                                    onClick={() => toggleCategory(category.title)}
+                                    className="flex items-center justify-between px-3 group"
+                                >
+                                    <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em] group-active:text-white/60 transition-colors">
+                                        {category.title}
+                                    </span>
+                                    {isCollapsed ? <ChevronRight size={12} className="text-muted" /> : <ChevronDown size={12} className="text-muted" />}
+                                </button>
+
+                                {!isCollapsed && (
+                                    <div className="flex flex-col gap-1 mt-1 animate-slide-up">
+                                        {visibleItems.map(({ to, icon: Icon, tKey }) => {
+                                            const isFriends = to === '/friends';
+                                            const showBadge = isFriends && totalNotifs > 0;
+
+                                            return (
+                                                <NavLink key={to} to={to} end={to === '/'}>
+                                                    {({ isActive }) => (
+                                                        <div className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 active:scale-95 cursor-pointer relative ${isActive
+                                                            ? 'bg-primary-500/10 text-primary-400 border border-primary-500/10'
+                                                            : 'text-white/50 hover:bg-surface-700/40'
+                                                            }`}>
+                                                            <div className="relative">
+                                                                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'drop-shadow-[0_0_10px_rgba(236,72,153,0.4)]' : ''} />
+                                                                {showBadge && (
+                                                                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5
+                                                                                    bg-accent-red rounded-full flex items-center justify-center
+                                                                                    text-[9px] font-bold text-white shadow-lg shadow-accent-red/20 border-2 border-surface-800">
+                                                                        {totalNotifs > 9 ? '9+' : totalNotifs}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <span className={`text-[14px] ${isActive ? 'font-bold' : 'font-medium'}`}>
+                                                                {tKey === 'Admin' ? 'Admin' : t(tKey)}
+                                                            </span>
+                                                            {isActive && (
+                                                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500 shadow-[0_0_10px_rgba(236,72,153,0.6)]" />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </NavLink>
+                                            );
+                                        })}
                                     </div>
                                 )}
-                            </NavLink>
+                            </div>
                         );
                     })}
                 </div>
 
-                {/* Logout at bottom */}
-                <div className="px-3 pt-2 pb-6 border-t border-surface-700/40">
+                {/* Logout footer */}
+                <div className="px-5 pt-4 pb-8 border-t border-surface-700/40 bg-surface-800/50 backdrop-blur-md">
                     <button
-                        id="mobile-logout-btn"
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl
-                                   text-white/50 hover:text-accent-red hover:bg-accent-red/10
-                                   transition-all duration-150 text-sm font-medium"
+                        className="w-full h-14 bg-surface-700 hover:bg-surface-600 active:bg-accent-red/10 active:text-accent-red border border-surface-600 rounded-3xl flex items-center justify-center gap-3 transition-all active:scale-95 group font-bold text-white/60"
                     >
-                        <LogOut size={18} strokeWidth={1.8} />
+                        <LogOut size={20} className="group-active:text-accent-red transition-colors" />
                         Cerrar sesión
                     </button>
+                    <p className="text-center text-[10px] text-muted/30 uppercase tracking-[0.3em] font-black mt-4">Hábitos © 2026</p>
                 </div>
             </nav>
         </>

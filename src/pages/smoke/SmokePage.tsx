@@ -22,6 +22,8 @@ export default function SmokePage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [showLogModal, setShowLogModal] = useState(false);
+    const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
+    const [quantity, setQuantity] = useState(1);
 
     const fetchData = async () => {
         try {
@@ -35,6 +37,16 @@ export default function SmokePage() {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDeleteProfile = async () => {
+        if (!window.confirm('¿Estás seguro de que querés eliminar tus datos de fumador? Se borrará todo tu progreso y configuración.')) return;
+        try {
+            await smokeApi.deleteProfile();
+            navigate('/');
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -69,12 +81,21 @@ export default function SmokePage() {
                         </div>
                     </div>
                 </div>
-                <button
-                    onClick={() => navigate('/smoke/onboarding')}
-                    className="p-2.5 bg-surface-800 rounded-xl text-muted hover:text-white transition-colors"
-                >
-                    <MoreHorizontal size={20} />
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleDeleteProfile}
+                        className="p-2.5 bg-accent-red/10 rounded-xl text-accent-red hover:bg-accent-red/20 transition-colors"
+                        title="Eliminar datos de fumador"
+                    >
+                        <User size={20} />
+                    </button>
+                    <button
+                        onClick={() => navigate('/smoke/onboarding')}
+                        className="p-2.5 bg-surface-800 rounded-xl text-muted hover:text-white transition-colors"
+                    >
+                        <MoreHorizontal size={20} />
+                    </button>
+                </div>
             </div>
 
             {/* Main Streak Counter */}
@@ -95,7 +116,6 @@ export default function SmokePage() {
                 <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-primary-600/10 rounded-full blur-[60px]" />
             </div>
 
-            {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-4 mb-6">
                 <StatCard
                     icon={Flame}
@@ -111,6 +131,23 @@ export default function SmokePage() {
                     color="text-accent-green bg-accent-green/10"
                     delay="delay-[200ms]"
                 />
+            </div>
+
+            {/* Fumé un cigarrillo - Main Action */}
+            <div className="mb-8">
+                <button
+                    onClick={() => {
+                        setQuantity(1);
+                        setSelectedTrigger(null);
+                        setShowLogModal(true);
+                    }}
+                    className="w-full py-5 bg-surface-700 hover:bg-surface-600 rounded-3xl text-sm font-black text-white flex items-center justify-center gap-3 border-2 border-accent-red/20 transition-all active:scale-95 shadow-xl shadow-black/20 group"
+                >
+                    <div className="w-10 h-10 bg-accent-red/20 rounded-xl flex items-center justify-center text-accent-red group-hover:scale-110 transition-transform">
+                        <AlertCircle size={22} strokeWidth={2.5} />
+                    </div>
+                    <span className="uppercase tracking-[0.1em]">Fumé un cigarrillo</span>
+                </button>
             </div>
 
             {/* Daily Consumption Progress */}
@@ -164,7 +201,11 @@ export default function SmokePage() {
             {/* Action Buttons */}
             <div className="flex gap-4">
                 <button
-                    onClick={() => setShowLogModal(true)}
+                    onClick={() => {
+                        setQuantity(1);
+                        setSelectedTrigger(null);
+                        setShowLogModal(true);
+                    }}
                     className="flex-1 py-4 bg-surface-700 hover:bg-surface-600 rounded-2xl text-xs font-bold text-white flex items-center justify-center gap-2 border border-white/5 transition-all active:scale-95"
                 >
                     <AlertCircle size={16} className="text-accent-red" />
@@ -187,16 +228,21 @@ export default function SmokePage() {
                             <div>
                                 <label className="block text-[10px] font-bold text-muted uppercase mb-2 ml-1">Cigarrillos</label>
                                 <div className="flex items-center justify-between bg-surface-700/50 rounded-2xl p-2 px-4 shadow-inner">
-                                    <button onClick={() => { }} className="text-2xl font-bold p-2">-</button>
-                                    <span className="text-2xl font-black text-white">1</span>
-                                    <button onClick={() => { }} className="text-2xl font-bold p-2">+</button>
+                                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="text-2xl font-bold p-2">-</button>
+                                    <span className="text-2xl font-black text-white">{quantity}</span>
+                                    <button onClick={() => setQuantity(q => q + 1)} className="text-2xl font-bold p-2">+</button>
                                 </div>
                             </div>
 
-                            {/* Triggers rápidos */}
                             <div className="flex flex-wrap gap-2">
                                 {['Estrés', 'Aburrimiento', 'Café', 'Alcohol', 'Después de comer'].map(t => (
-                                    <button key={t} className="px-3 py-1.5 bg-surface-700 hover:bg-surface-600 rounded-lg text-[10px] font-bold text-white/60 transition-colors uppercase border border-white/5">
+                                    <button
+                                        key={t}
+                                        onClick={() => setSelectedTrigger(selectedTrigger === t ? null : t)}
+                                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase border ${selectedTrigger === t
+                                            ? 'bg-primary-500 border-primary-400 text-white shadow-[0_0_10px_rgba(236,72,153,0.3)]'
+                                            : 'bg-surface-700 border-white/5 text-white/60 hover:text-white hover:bg-surface-600'}`}
+                                    >
                                         {t}
                                     </button>
                                 ))}
@@ -204,11 +250,20 @@ export default function SmokePage() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                            <button onClick={() => setShowLogModal(false)} className="btn-ghost py-3 font-bold text-xs uppercase tracking-widest bg-white/5">Cancelar</button>
+                            <button onClick={() => {
+                                setShowLogModal(false);
+                                setSelectedTrigger(null);
+                                setQuantity(1);
+                            }} className="btn-ghost py-3 font-bold text-xs uppercase tracking-widest bg-white/5">Cancelar</button>
                             <button
                                 onClick={async () => {
-                                    await smokeApi.logSmoke({ quantity: 1 });
+                                    await smokeApi.logSmoke({
+                                        quantity: quantity,
+                                        trigger: selectedTrigger || undefined
+                                    });
                                     setShowLogModal(false);
+                                    setSelectedTrigger(null);
+                                    setQuantity(1);
                                     fetchData();
                                 }}
                                 className="btn-primary py-3 font-bold text-xs uppercase tracking-widest bg-accent-red border-none shadow-lg shadow-accent-red/20"

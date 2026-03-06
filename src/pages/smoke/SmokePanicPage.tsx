@@ -42,7 +42,7 @@ export default function SmokePanicPage() {
 
         const msgInterval = setInterval(() => {
             setMessageIndex(i => (i + 1) % MESSAGES.length);
-        }, 12000);
+        }, 8000);
 
         return () => {
             clearInterval(timerRef.current);
@@ -66,103 +66,158 @@ export default function SmokePanicPage() {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-black">
-            {/* Background animated circles */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-                <div className="absolute top-[20%] left-[10%] w-96 h-96 bg-primary-600 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[20%] right-[10%] w-96 h-96 bg-accent-amber/40 rounded-full blur-[120px] animate-pulse delay-1000" />
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black overflow-hidden select-none">
+            {/* Immersive Background Elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[60%] bg-primary-900/20 rounded-full blur-[160px] animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-5%] w-[60%] h-[60%] bg-accent-amber/10 rounded-full blur-[160px] animate-pulse delay-1000" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)]" />
             </div>
 
-            {/* Back button */}
-            <button
-                onClick={() => navigate('/smoke')}
-                className="absolute top-6 left-6 w-12 h-12 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-all active:scale-95"
-            >
-                <ChevronLeft size={24} />
-            </button>
+            {/* Back Button (Floating) */}
+            <div className="absolute top-8 left-8 z-20">
+                <button
+                    onClick={() => navigate('/smoke')}
+                    className="group flex items-center gap-3 text-white/40 hover:text-white transition-all p-2"
+                >
+                    <div className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-white/10 group-active:scale-90 transition-all">
+                        <ChevronLeft size={20} />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden sm:block">Abandonar</span>
+                </button>
+            </div>
 
             {!done ? (
-                <div className="w-full max-w-sm flex flex-col items-center relative z-10 animate-fade-in">
-                    <div className="w-20 h-20 bg-accent-amber/20 rounded-3xl flex items-center justify-center text-accent-amber mb-8 shadow-[0_0_30px_rgba(251,191,36,0.2)]">
-                        <Wind size={40} className="animate-pulse" />
-                    </div>
+                /* Main Layout Container */
+                <div className={`w-full max-w-6xl px-8 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24 transition-all duration-1000 opacity-100 scale-100 translate-y-0`}>
 
-                    <h1 className="text-3xl font-black text-white text-center mb-2 tracking-tight">Aguantá un poco más</h1>
-                    <p className="text-muted text-center mb-12 italic h-10 px-4">{MESSAGES[messageIndex]}</p>
+                    {/* Left Section: Immersion & Breathing */}
+                    <div className="flex-1 flex flex-col items-center order-2 lg:order-1">
+                        <div className="relative flex items-center justify-center">
+                            <div className="w-64 h-64 sm:w-80 sm:h-80 lg:w-[520px] lg:h-[520px] rounded-full border border-white/[0.03]" />
+                            <div className="absolute w-48 h-48 sm:w-64 sm:h-64 lg:w-[420px] lg:h-[420px] rounded-full border border-white/[0.05]" />
 
-                    {/* Timer Circle */}
-                    <div className="relative mb-20 flex items-center justify-center">
-                        {/* Static bg circle */}
-                        <div className="w-64 h-64 rounded-full border-[8px] border-white/5 flex items-center justify-center" />
+                            <div className="absolute w-40 h-40 sm:w-56 sm:h-56 lg:w-[340px] lg:h-[340px] bg-primary-500/5 border-2 border-primary-500/20 rounded-full flex items-center justify-center animate-breathing" />
+                            <div className="absolute w-40 h-40 sm:w-56 sm:h-56 lg:w-[340px] lg:h-[340px] bg-primary-500/10 rounded-full blur-[50px] animate-breathing opacity-40" />
 
-                        {/* Animated breathing circle */}
-                        <div className="absolute w-56 h-56 bg-primary-500/10 border-4 border-primary-500/30 rounded-full flex items-center justify-center animate-breathing" />
-
-                        {/* Inner content */}
-                        <div className="absolute flex flex-col items-center">
-                            <span className="text-6xl font-black text-white tabular-nums tracking-tighter drop-shadow-lg">
-                                {formatTime(seconds)}
-                            </span>
-                            <span className="text-[10px] font-black tracking-[0.3em] text-primary-400 mt-2 uppercase">Quedan</span>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3 w-full">
-                        <button
-                            onClick={() => setShowAdvice(!showAdvice)}
-                            className="w-full py-4 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold text-white/50 flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
-                        >
-                            <Info size={16} />
-                            {showAdvice ? "OCULTAR CONSEJOS" : "VER CONSEJOS RÁPIDOS"}
-                        </button>
-
-                        {showAdvice && (
-                            <div className="grid grid-cols-2 gap-3 mt-2 animate-slide-up">
-                                {ADVICE.map((a, i) => (
-                                    <div key={i} className={`p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-3 items-center text-center`}>
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${a.color}`}>
-                                            <a.icon size={20} />
-                                        </div>
-                                        <p className="text-[10px] leading-tight font-bold text-white/80">{a.text}</p>
-                                    </div>
-                                ))}
+                            <div className="absolute flex flex-col items-center">
+                                <span className="text-6xl sm:text-7xl lg:text-[10rem] font-black text-white tabular-nums tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                                    {formatTime(seconds)}
+                                </span>
+                                <span className="text-[10px] lg:text-xs font-black tracking-[0.6em] text-primary-400 mt-2 lg:mt-4 uppercase opacity-50">Quedan</span>
                             </div>
-                        )}
+                        </div>
 
-                        <button
-                            onClick={handleSuccess}
-                            className="w-full py-4 rounded-2xl bg-white/10 border border-white/10 text-xs font-bold text-white/30 hover:text-white/60 transition-all mt-4"
-                        >
-                            YA LO SUPERÉ (VOLVER)
-                        </button>
+                        <p className="mt-8 lg:mt-16 text-xs lg:text-sm font-bold text-primary-400/60 uppercase tracking-[0.5em] animate-pulse shrink-0">
+                            Inhalá... Respirá...
+                        </p>
+                    </div>
+
+                    {/* Right Section: Messages & User Guidance */}
+                    <div className="flex-1 max-w-md w-full flex flex-col items-center lg:items-start order-1 lg:order-2">
+                        <div className="mb-6 lg:mb-10 w-16 h-16 lg:w-20 lg:h-20 bg-accent-amber/20 rounded-3xl flex items-center justify-center text-accent-amber shadow-[0_0_60px_rgba(251,191,36,0.1)] animate-float">
+                            <Wind size={32} strokeWidth={2.5} />
+                        </div>
+
+                        <div className="text-center lg:text-left mb-10 lg:mb-16">
+                            <h1 className="text-3xl lg:text-6xl font-black text-white mb-6 lg:mb-8 tracking-tight leading-[1.1]">
+                                Aguantá un<br className="hidden lg:block" /> poco más
+                            </h1>
+                            <p className="text-soft lg:text-xl italic font-medium h-12 lg:h-24 transition-all duration-700 ease-in-out">
+                                "{MESSAGES[messageIndex]}"
+                            </p>
+                        </div>
+
+                        <div className="w-full space-y-4 lg:space-y-6">
+                            <button
+                                onClick={() => setShowAdvice(!showAdvice)}
+                                className={`w-full py-5 lg:py-6 rounded-2xl bg-white/5 border border-white/10 text-[10px] lg:text-xs font-black tracking-[0.2em] text-white/40 flex items-center justify-center gap-3 hover:bg-white/10 hover:text-white transition-all ${showAdvice ? 'bg-white/10 text-white border-white/20' : ''}`}
+                            >
+                                <Info size={18} />
+                                {showAdvice ? "OCULTAR CONSEJOS" : "ESTOY MUY ANSIOSO"}
+                            </button>
+
+                            {showAdvice && (
+                                <div className="grid grid-cols-2 gap-4 animate-slide-up">
+                                    {ADVICE.map((a, i) => (
+                                        <div key={i} className="p-4 lg:p-6 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-3 items-center text-center group hover:bg-white/[0.08] transition-all cursor-default">
+                                            <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center ${a.color} group-hover:scale-110 transition-transform shadow-lg`}>
+                                                <a.icon size={20} />
+                                            </div>
+                                            <p className="text-[9px] lg:text-[10px] leading-tight font-black uppercase text-white/50 tracking-widest group-hover:text-white transition-colors">{a.text}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {!showAdvice && (
+                                <button
+                                    onClick={handleSuccess}
+                                    className="w-full py-4 text-[9px] lg:text-[10px] font-black tracking-[0.3em] text-white/10 hover:text-white/40 transition-all uppercase"
+                                >
+                                    Ya me siento mejor
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             ) : (
-                <div className="w-full max-w-sm flex flex-col items-center relative z-10 animate-scale-in">
-                    <div className="w-24 h-24 bg-accent-green/20 rounded-full flex items-center justify-center text-accent-green mb-10 shadow-[0_0_50px_rgba(34,197,94,0.3)]">
-                        <CheckCircle2 size={56} />
+                /* Victory Immersive Screen */
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-t from-accent-green/10 via-black to-black animate-fade-in">
+                    <div className="w-32 h-32 lg:w-48 lg:h-48 bg-accent-green/20 rounded-full flex items-center justify-center text-accent-green mb-10 lg:mb-16 shadow-[0_0_120px_rgba(34,197,94,0.3)] border border-accent-green/30 animate-scale-in">
+                        <CheckCircle2 size={72} strokeWidth={1} />
                     </div>
-                    <h1 className="text-4xl font-black text-white text-center mb-4 tracking-tight">¡LO LOGRASTE!</h1>
-                    <p className="text-soft text-center mb-12 text-sm max-w-[200px]">Pasaste los 3 minutos críticos. Este impulso ya no tiene poder sobre vos.</p>
+
+                    <div className="max-w-xl text-center animate-slide-up">
+                        <h1 className="text-5xl lg:text-8xl font-black text-white mb-6 lg:mb-8 tracking-tighter italic uppercase">¡VICTORIA!</h1>
+                        <p className="text-soft lg:text-2xl text-center mb-16 font-medium leading-relaxed">
+                            Pasaste los 180 segundos clave. El impulso ya se fue de tu sistema. Sos dueño de tus decisiones.
+                        </p>
+                    </div>
 
                     <button
                         onClick={handleSuccess}
-                        className="w-full py-5 bg-accent-green text-black font-black text-sm rounded-2xl shadow-xl shadow-accent-green/20 active:scale-95 transition-all"
+                        className="w-full max-w-sm py-6 lg:py-8 bg-accent-green text-black font-black text-xs lg:text-sm rounded-3xl shadow-[0_20px_50px_rgba(34,197,94,0.3)] active:scale-95 hover:scale-105 hover:brightness-110 transition-all uppercase tracking-[0.3em]"
                     >
-                        REGRESAR VICTORIOSO
+                        Volver Triunfante
                     </button>
+
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className={`absolute w-2 h-2 rounded-full bg-accent-green/40 blur-sm animate-float-slow`} style={{
+                                top: `${Math.random() * 100}%`,
+                                left: `${Math.random() * 100}%`,
+                                animationDuration: `${3 + Math.random() * 4}s`,
+                                animationDelay: `${Math.random() * 2}s`
+                            }} />
+                        ))}
+                    </div>
                 </div>
             )}
 
-            {/* Injected Breathing Animation Styles */}
+            {/* Optimized Animations */}
             <style dangerouslySetInnerHTML={{
                 __html: `
                 @keyframes breathing {
-                    0%, 100% { transform: scale(1); opacity: 0.1; }
-                    50% { transform: scale(1.15); opacity: 0.25; }
+                    0%, 100% { transform: scale(1); opacity: 0.05; }
+                    50% { transform: scale(1.5); opacity: 0.25; }
                 }
                 .animate-breathing {
-                    animation: breathing 4s ease-in-out infinite;
+                    animation: breathing 6s ease-in-out infinite;
+                }
+                @keyframes float {
+                    0%, 100% { transform: translateY(0) rotate(0); }
+                    50% { transform: translateY(-15px) rotate(2deg); }
+                }
+                .animate-float {
+                    animation: float 4s ease-in-out infinite;
+                }
+                @keyframes float-slow {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-30px); }
+                }
+                .animate-float-slow {
+                    animation: float-slow 5s ease-in-out infinite;
                 }
             `}} />
         </div>
