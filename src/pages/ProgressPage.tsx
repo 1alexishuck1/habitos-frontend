@@ -45,7 +45,7 @@ export default function ProgressPage() {
                         <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
                             <Zap size={16} className="text-primary-400" /> Tu Nivel Actual
                         </h2>
-                        <p className="text-xs text-soft mt-0.5">Nivel {user?.level ?? 1}</p>
+                        <p className="text-xs text-soft mt-0.5">Nivel {Math.floor((user?.experience ?? 0) / 100) + 1}</p>
                     </div>
                     <div className="text-right">
                         <span className="text-xl font-black text-white">{(user?.experience ?? 0) % 100} <span className="text-sm font-medium text-soft">/ 100 XP</span></span>
@@ -60,7 +60,7 @@ export default function ProgressPage() {
                     </div>
                 </div>
                 <p className="text-[10px] text-center text-muted uppercase tracking-widest mt-2">
-                    {100 - ((user?.experience ?? 0) % 100)} XP para el nivel {(user?.level ?? 1) + 1}
+                    {100 - ((user?.experience ?? 0) % 100)} XP para el nivel {Math.floor((user?.experience ?? 0) / 100) + 2}
                 </p>
             </div>
 

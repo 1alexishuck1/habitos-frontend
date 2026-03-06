@@ -99,7 +99,7 @@ export default function DashboardPage() {
 
     // Default selectedDate is today
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const dateStr = selectedDate.toISOString().split('T')[0];
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
     const dayOfWeekKey = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][selectedDate.getDay()] as any;
 
@@ -207,9 +207,9 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-2">
                 <div>
                     <h1 className="text-xl font-bold text-white flex items-center gap-2">
-                        Hola, {user?.name?.split(' ')[0]} 👋
+                        Hola, {user?.name} 👋
                         <div className="badge border border-primary-500/50 bg-primary-500/20 text-primary-400 font-black px-2 py-0.5 text-xs">
-                            Nvl. {user?.level ?? 1}
+                            Nvl. {Math.floor((user?.experience ?? 0) / 100) + 1}
                         </div>
                     </h1>
                     <p className="text-sm text-muted mt-0.5">{format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}</p>
