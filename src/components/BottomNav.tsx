@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
     Home, Flame, CheckSquare, BarChart2, Book,
-    Settings, Users, Menu, X, LogOut, Dumbbell, Zap, ShieldCheck
+    Settings, Users, Menu, X, LogOut, Dumbbell, Zap, ShieldCheck, Wind
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
@@ -19,6 +19,7 @@ const navItems = [
     { to: '/diary', icon: Book, tKey: 'nav.diary' },
     { to: '/friends', icon: Users, tKey: 'nav.friends' },
     { to: '/gym', icon: Dumbbell, tKey: 'nav.gym' },
+    { to: '/smoke', icon: Wind, tKey: 'nav.smoke' },
     { to: '/settings', icon: Settings, tKey: 'nav.settings' },
 ];
 

@@ -9,11 +9,14 @@ import HabitsPage from '@/pages/HabitsPage';
 import TasksPage from '@/pages/TasksPage';
 import ProgressPage from '@/pages/ProgressPage';
 import StatsPage from '@/pages/StatsPage';
+import AdminPage from '@/pages/AdminPage';
 import DiaryPage from '@/pages/DiaryPage';
 import SettingsPage from '@/pages/SettingsPage';
 import FriendsPage from '@/pages/FriendsPage';
 import GymPage from '@/pages/GymPage';
-import AdminPage from '@/pages/AdminPage';
+import SmokePage from '@/pages/smoke/SmokePage';
+import SmokeOnboardingPage from '@/pages/smoke/SmokeOnboardingPage';
+import SmokePanicPage from '@/pages/smoke/SmokePanicPage';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
 import { initPushNotifications } from '@/services/pushNotifications';
@@ -74,7 +77,11 @@ export default function App() {
                     <Route path="friends" element={<FriendsPage />} />
                     <Route path="gym" element={<GymPage />} />
                     <Route path="admin" element={<AdminPage />} />
+                    <Route path="smoke" element={<SmokePage />} />
+                    <Route path="smoke/onboarding" element={<SmokeOnboardingPage />} />
                 </Route>
+                <Route path="/smoke/panic" element={<ProtectedRoute><SmokePanicPage /></ProtectedRoute>} />
+
 
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

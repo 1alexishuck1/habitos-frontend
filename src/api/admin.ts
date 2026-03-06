@@ -7,6 +7,12 @@ export interface AdminStats {
     totalCompletedHabitSnapshots: number;
     totalTasks: number;
     totalCompletedTasks: number;
+    latestUsers: {
+        id: string;
+        name: string;
+        email: string;
+        createdAt: string;
+    }[];
 }
 
 export const getAdminStats = async (): Promise<AdminStats> => {

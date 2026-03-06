@@ -14,6 +14,7 @@ const es = {
             diary: 'Diario',
             friends: 'Amigos',
             gym: 'Gimnasio',
+            smoke: 'Libre de Humo',
             settings: 'Configuración',
         },
         diary: {
@@ -181,6 +182,7 @@ const en = {
             diary: 'Diary',
             friends: 'Friends',
             gym: 'Gym',
+            smoke: 'Smoke Free',
             settings: 'Settings',
         },
         diary: {

@@ -104,6 +104,45 @@ export default function AdminPage() {
                     />
                 </div>
             )}
+
+            {stats?.latestUsers && (
+                <div className="mt-10">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Users size={18} className="text-muted" />
+                        <h2 className="text-sm font-bold text-white uppercase tracking-widest">Últimos 5 usuarios registrados</h2>
+                    </div>
+                    <div className="card bg-surface-800/40 border-surface-700/50 p-0 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="border-b border-surface-700/50 bg-surface-700/20 text-[10px] font-black text-muted uppercase tracking-widest">
+                                        <th className="px-5 py-3">Nombre</th>
+                                        <th className="px-5 py-3">Email</th>
+                                        <th className="px-5 py-3 text-right">Registrado</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-surface-700/30">
+                                    {stats.latestUsers.map((user) => (
+                                        <tr key={user.id} className="hover:bg-surface-700/20 transition-colors">
+                                            <td className="px-5 py-4">
+                                                <p className="text-sm font-bold text-white">{user.name}</p>
+                                            </td>
+                                            <td className="px-5 py-4">
+                                                <p className="text-xs text-soft">{user.email}</p>
+                                            </td>
+                                            <td className="px-5 py-4 text-right">
+                                                <p className="text-[10px] font-medium text-muted">
+                                                    {new Date(user.createdAt).toLocaleDateString()}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
