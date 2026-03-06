@@ -173,6 +173,7 @@ export default function DashboardPage() {
             // since taskApi might not support rollback date, we just change status for now
             await taskApi.changeStatus(id, next);
             setTasks(prev => prev.map(t => t.id === id ? { ...t, status: next } : t));
+            refreshUser();
         } catch { /* handled */ }
     };
 

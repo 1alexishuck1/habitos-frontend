@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { reflectionApi, Reflection } from '@/api/reflections';
-import { Smile, Frown, Meh, Heart, Sun, Loader2 } from 'lucide-react';
+import { Smile, Frown, Meh, Heart, Sun, Loader2, Lock } from 'lucide-react';
 
 const MOODS = [
     { icon: Sun, label: 'Enérgico', value: '☀️' },
@@ -62,8 +62,8 @@ export function DailyReflectionCard({ onSave }: { onSave?: () => void }) {
                         key={m.value}
                         onClick={() => setSelectedMood(m.value)}
                         className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all flex-1 min-w-0 border-2 ${selectedMood === m.value
-                                ? 'bg-primary-500/10 border-primary-500 text-primary-400 scale-105'
-                                : 'bg-surface-700/30 border-transparent text-muted hover:bg-surface-700/50'
+                            ? 'bg-primary-500/10 border-primary-500 text-primary-400 scale-105'
+                            : 'bg-surface-700/30 border-transparent text-muted hover:bg-surface-700/50'
                             }`}
                     >
                         <m.icon size={18} />
@@ -77,8 +77,15 @@ export function DailyReflectionCard({ onSave }: { onSave?: () => void }) {
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={t('diary.placeholder')}
                 style={{ fontSize: '16px' }}
-                className="w-full bg-surface-900/50 border border-surface-700 rounded-xl p-3 text-white placeholder:text-white/20 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all mb-3 resize-none min-h-[90px]"
+                className="w-full bg-surface-900/50 border border-surface-700 rounded-xl p-3 text-white placeholder:text-white/20 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all resize-none min-h-[90px]"
             />
+
+            <div className="flex items-center gap-1.5 mt-2 mb-4 px-1">
+                <Lock size={12} className="text-primary-500/60" />
+                <p className="text-[10px] text-primary-500/60 leading-tight">
+                    Tus reflexiones están encriptadas. Sólo vos podés leer lo que escribís.
+                </p>
+            </div>
 
             <button
                 onClick={handleSave}

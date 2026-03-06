@@ -25,9 +25,15 @@ export default function ProgressPage() {
     // Group logs by day
     const groupedLogs: Record<string, ExperienceLog[]> = {};
     for (const log of xpLogs) {
-        const dateStr = new Date(log.createdAt).toISOString().split('T')[0];
+        // Use local timezone formatting for grouping
+        const dateStr = format(new Date(log.createdAt), 'yyyy-MM-dd');
         if (!groupedLogs[dateStr]) groupedLogs[dateStr] = [];
-        groupedLogs[dateStr].push(log);
+
+        // Deduplicate identical reasons on the same day
+        const isDuplicate = groupedLogs[dateStr].some(existing => existing.reason === log.reason);
+        if (!isDuplicate) {
+            groupedLogs[dateStr].push(log);
+        }
     }
 
     const sortedDates = Object.keys(groupedLogs).sort((a, b) => b.localeCompare(a));

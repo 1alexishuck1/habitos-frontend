@@ -4,6 +4,7 @@ import { Plus, Circle, CheckCircle2, Trash2 } from 'lucide-react';
 import { taskApi } from '@/api/tasks';
 import { Task, TaskStatus } from '@/types';
 import { useTaskStore } from '@/store/taskStore';
+import { useAuthStore } from '@/store/authStore';
 import { ConfirmModal } from '@/components/ConfirmModal';
 
 const STATUS_CYCLE: Record<TaskStatus, TaskStatus> = {
@@ -203,6 +204,7 @@ function CreateTaskModal({ onClose, onCreate }: { onClose: () => void; onCreate:
 export default function TasksPage() {
     const { t } = useTranslation();
     const { tasks, setTasks, updateTask, removeTask, addTask } = useTaskStore();
+    const { refreshUser } = useAuthStore();
     const [filter, setFilter] = useState<TaskStatus | 'ALL'>('ALL');
     const [showCreate, setShowCreate] = useState(false);
     const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
@@ -217,6 +219,7 @@ export default function TasksPage() {
         const next = STATUS_CYCLE[task.status];
         const { data } = await taskApi.changeStatus(id, next);
         updateTask({ id, status: data.status, doneAt: data.doneAt });
+        refreshUser();
     };
 
     const handleDelete = (id: string) => {
