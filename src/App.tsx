@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import LoginPage from '@/pages/LoginPage';
@@ -29,6 +29,16 @@ import { useFriendNotifStore } from '@/store/friendNotifStore';
 import { Analytics } from '@vercel/analytics/react';
 
 // App root — initializes theme and defines all routes
+
+function ScrollToTop() {
+    const { pathname } = useLocation();
+
+    React.useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
+
+    return null;
+}
 
 export default function App() {
     // Apply persisted theme on mount
@@ -63,6 +73,7 @@ export default function App() {
 
     return (
         <BrowserRouter>
+            <ScrollToTop />
             <Analytics />
             <Routes>
                 {/* Public */}
