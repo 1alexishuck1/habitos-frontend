@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import {
     Flame, Zap, Trophy, Users, CheckSquare, BarChart2,
-    Wind, Dumbbell, ShieldCheck, ArrowRight, Star
+    Wind, Dumbbell, ShieldCheck, ArrowRight, UserCheck
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -158,35 +158,53 @@ export default function LandingPage() {
                             </div>
                         </div>
                         <div className="flex-1 relative">
-                            {/* Visual Mockup - CSS Based */}
+                            {/* Visual Mockup - Based on ProgressPage */}
                             <div className="relative w-full aspect-square max-w-md mx-auto">
                                 <div className="absolute inset-0 bg-gradient-to-tr from-primary-500/20 to-accent-amber/20 rounded-full blur-[60px]" />
                                 <div className="relative bg-surface-800 rounded-[2.5rem] p-8 border border-surface-700 shadow-2xl">
-                                    <div className="flex justify-between items-center mb-8">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-surface-700 border border-surface-600" />
-                                            <div>
-                                                <div className="w-20 h-3 bg-surface-700 rounded-full mb-1" />
-                                                <div className="w-12 h-2 bg-primary-500/20 rounded-full" />
-                                            </div>
+
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div>
+                                            <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                                                <Zap size={16} className="text-primary-400" /> Tu Nivel Actual
+                                            </h2>
+                                            <p className="text-xs text-soft mt-0.5">Nivel 4</p>
                                         </div>
-                                        <div className="w-8 h-8 rounded-full bg-accent-amber/10 flex items-center justify-center">
-                                            <Star size={14} className="text-accent-amber" />
+                                        <div className="text-right">
+                                            <span className="text-xl font-black text-white">85 <span className="text-sm font-medium text-soft">/ 100 XP</span></span>
                                         </div>
                                     </div>
-                                    <div className="space-y-4">
-                                        {[80, 45, 95].map((w, i) => (
-                                            <div key={i} className="p-4 rounded-2xl bg-surface-700/40 border border-surface-600/30">
-                                                <div className="flex justify-between mb-2">
-                                                    <div className="w-24 h-3 bg-surface-600 rounded-full" />
-                                                    <div className="w-8 h-3 bg-primary-500/40 rounded-full" />
+
+                                    <div className="h-4 rounded-full bg-surface-700/50 overflow-hidden mb-2 border border-white/5 relative">
+                                        <div className="h-full rounded-full bg-gradient-to-r from-primary-600 via-primary-400 to-accent-amber relative" style={{ width: '85%' }} />
+                                    </div>
+                                    <p className="text-[10px] text-center text-muted uppercase tracking-widest mt-2 mb-8">
+                                        15 XP para el nivel 5
+                                    </p>
+
+                                    <h3 className="text-xs font-bold text-muted uppercase tracking-widest mb-3 pb-1 border-b border-surface-700/50 leading-tight">
+                                        Actividad reciente
+                                    </h3>
+                                    <div className="space-y-2">
+                                        {[
+                                            { reason: 'Completaste "Tomar agua"', amount: 15 },
+                                            { reason: 'Racha de 7 días', amount: 50 },
+                                            { reason: 'Ir al gimnasio', amount: 20 }
+                                        ].map((log, i) => (
+                                            <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-surface-800/40 border border-surface-700/30">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-surface-700/50 flex items-center justify-center text-accent-amber shrink-0">
+                                                        <Zap size={14} />
+                                                    </div>
+                                                    <span className="text-sm font-medium text-white truncate">{log.reason}</span>
                                                 </div>
-                                                <div className="w-full h-2 bg-surface-800 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-primary-500 shadow-[0_0_10px_rgba(236,72,153,0.5)]" style={{ width: `${w}%` }} />
-                                                </div>
+                                                <span className="text-sm font-black text-accent-amber px-2 py-1 rounded-md bg-accent-amber/10 shrink-0 ml-2">
+                                                    +{log.amount} XP
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
+
                                 </div>
                             </div>
                         </div>
@@ -216,14 +234,32 @@ export default function LandingPage() {
                         </div>
                         <div className="flex-1 w-full">
                             <div className="grid grid-cols-2 gap-4">
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className={`p-4 rounded-2xl bg-surface-800 border border-surface-700 ${i % 2 === 0 ? 'mt-8' : ''}`}>
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className="w-8 h-8 rounded-lg bg-surface-700" />
-                                            <div className="flex-1 h-2 bg-surface-700 rounded-full" />
+                                {[
+                                    { name: 'Alex', max: 12, week: 24, in: 'AL' },
+                                    { name: 'Sofía', max: 30, week: 45, in: 'SO' },
+                                    { name: 'Martín', max: 5, week: 12, in: 'MA' },
+                                    { name: 'Lucía', max: 18, week: 32, in: 'LU' }
+                                ].map((f, i) => (
+                                    <div key={i} className={`p-4 rounded-2xl bg-surface-800 border border-surface-700 shadow-xl ${i % 2 === 0 ? 'mt-8' : ''}`}>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 rounded-full bg-surface-700 border border-surface-600 flex items-center justify-center font-bold text-sm text-soft shrink-0">
+                                                {f.in}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-sm text-white truncate">{f.name}</div>
+                                                <div className="text-[10px] text-soft flex items-center gap-1 mt-0.5 truncate">
+                                                    <UserCheck size={10} className="shrink-0" />
+                                                    <span className="truncate">Amigos desde Sep.</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex gap-1">
-                                            {[1, 2, 3].map(j => <div key={j} className="h-4 w-4 rounded-full bg-primary-500/10" />)}
+                                        <div className="flex gap-2">
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-accent-red bg-surface-700/50 px-2 py-1.5 rounded-lg border border-surface-600/30 shrink-0">
+                                                <Flame size={12} className="text-accent-red" /> {f.max}
+                                            </span>
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-accent-green bg-surface-700/50 px-2 py-1.5 rounded-lg border border-surface-600/30 min-w-0 truncate">
+                                                <CheckSquare size={12} className="text-accent-green" /> {f.week} t. hechas
+                                            </span>
                                         </div>
                                     </div>
                                 ))}
@@ -244,7 +280,7 @@ export default function LandingPage() {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                         <button
                             onClick={() => navigate('/register')}
-                            className="w-full sm:w-auto bg-white text-surface-950 px-12 py-5 rounded-2xl text-xl font-black shadow-2xl transition-all hover:scale-105 active:scale-95"
+                            className="w-full sm:w-auto bg-white text-surface-900 px-12 py-5 rounded-2xl text-xl font-black shadow-2xl transition-all hover:scale-105 active:scale-95"
                         >
                             Crear mi cuenta ahora
                         </button>

@@ -20,6 +20,7 @@ export default {
                 },
                 // Dark surfaces
                 surface: {
+                    950: '#0b1221',
                     900: '#0f172a',
                     800: '#1e293b',
                     700: '#293548',
