@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Globe, LogOut, User, Bell, BellOff, BellRing, Smartphone, Trash2 } from 'lucide-react';
+import { Globe, LogOut, User, Bell, BellOff, BellRing, Smartphone, Trash2, X, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/api/auth';
 import { useNavigate } from 'react-router-dom';
@@ -192,6 +192,10 @@ export default function SettingsPage() {
     const { user, logout, refreshToken } = useAuthStore();
     const navigate = useNavigate();
 
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteEmailInput, setDeleteEmailInput] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const handleLogout = async () => {
         try { if (refreshToken) await authApi.logout(refreshToken); } catch { /* best effort */ }
         logout();
@@ -203,10 +207,15 @@ export default function SettingsPage() {
         localStorage.setItem('lang', lang);
     };
 
-    const handleDeleteAccount = async () => {
-        const confirmDelete = window.confirm("¿Estás seguro de que querés ELIMINAR tu cuenta permanentemente? Perderás todos tus hábitos, puntos de experiencia, rachas y configuración. Esta acción no se puede deshacer.");
-        if (!confirmDelete) return;
+    const handleDeleteAccountClick = () => {
+        setShowDeleteModal(true);
+        setDeleteEmailInput('');
+    };
 
+    const confirmDeleteAccount = async () => {
+        if (deleteEmailInput !== user?.email) return;
+
+        setIsDeleting(true);
         try {
             await authApi.deleteAccount();
             logout();
@@ -214,6 +223,8 @@ export default function SettingsPage() {
         } catch (error) {
             console.error("Error al eliminar la cuenta:", error);
             alert("Ocurrió un error al intentar eliminar la cuenta. Por favor intentá más tarde.");
+            setIsDeleting(false);
+            setShowDeleteModal(false);
         }
     };
 
@@ -273,7 +284,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
                 <button
-                    onClick={handleDeleteAccount}
+                    onClick={handleDeleteAccountClick}
                     className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 font-bold px-4 py-2.5 rounded-xl transition-colors text-sm"
                 >
                     Eliminar cuenta permanentemente
@@ -281,6 +292,59 @@ export default function SettingsPage() {
             </div>
 
             <p className="text-center text-xs text-muted mt-8">v1.0.0 · Hábitos App</p>
+
+            {/* Custom Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-950/80 backdrop-blur-md animate-fade-in">
+                    <div className="bg-surface-900 border border-red-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative animate-slide-up">
+                        <button
+                            onClick={() => setShowDeleteModal(false)}
+                            className="absolute top-4 right-4 text-surface-400 hover:text-white transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center mb-6 mx-auto">
+                            <AlertTriangle size={24} className="text-red-500" />
+                        </div>
+
+                        <h2 className="text-xl font-black text-white text-center mb-2">Eliminar Cuenta</h2>
+                        <p className="text-sm text-surface-300 text-center leading-relaxed mb-6">
+                            Esta acción <strong>no se puede deshacer</strong>. Perderás permanentemente toda tu experiencia, hábitos, tareas y configuraciones.
+                        </p>
+
+                        <div className="mb-6">
+                            <label className="block text-xs font-bold text-surface-400 uppercase tracking-widest mb-2">
+                                Escribí tu correo para confirmar
+                            </label>
+                            <input
+                                type="text"
+                                value={deleteEmailInput}
+                                onChange={(e) => setDeleteEmailInput(e.target.value)}
+                                placeholder={user?.email}
+                                className="w-full bg-surface-800 border-2 border-surface-700 focus:border-red-500 text-white px-4 py-3 rounded-xl outline-none transition-colors text-sm"
+                                autoFocus
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="flex-1 py-3 rounded-xl font-bold bg-surface-800 text-white hover:bg-surface-700 transition-colors text-sm"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmDeleteAccount}
+                                disabled={deleteEmailInput !== user?.email || isDeleting}
+                                className="flex-1 py-3 rounded-xl font-bold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:hover:bg-red-500 transition-colors text-sm flex justify-center items-center gap-2"
+                            >
+                                {isDeleting ? 'Eliminando...' : 'Eliminar todo'} <Trash2 size={16} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
