@@ -5,6 +5,56 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+function ConfirmModal({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    description,
+    confirmText = "Confirmar",
+    cancelText = "Cancelar",
+    variant = "danger"
+}: {
+    isOpen: boolean,
+    onClose: () => void,
+    onConfirm: () => void,
+    title: string,
+    description: string,
+    confirmText?: string,
+    cancelText?: string,
+    variant?: "danger" | "primary"
+}) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in shadow-2xl">
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full max-w-[320px] bg-surface-800 rounded-3xl overflow-hidden border border-surface-700 animate-slide-up p-6">
+                <div className={`w-16 h-16 ${variant === 'danger' ? 'bg-accent-red/10 text-accent-red' : 'bg-primary-500/10 text-primary-400'} rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4`}>
+                    {variant === 'danger' ? '⚠️' : '❓'}
+                </div>
+                <h3 className="text-xl font-bold text-white text-center mb-2">{title}</h3>
+                <p className="text-xs text-soft text-center mb-6">{description}</p>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <button onClick={onClose} className="btn-ghost py-2 rounded-xl font-bold text-xs uppercase tracking-widest bg-white/5 font-black">
+                        {cancelText}
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className={`py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg ${variant === 'danger'
+                            ? 'bg-accent-red text-white shadow-accent-red/20'
+                            : 'bg-primary-500 text-white shadow-primary-500/20'
+                            }`}
+                    >
+                        {confirmText}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function StatCard({ icon: Icon, label, value, color, delay }: { icon: any, label: string, value: string | number, color: string, delay: string }) {
     return (
         <div className={`card bg-surface-800/40 border-surface-700/50 p-4 animate-slide-up ${delay}`}>
@@ -22,6 +72,7 @@ export default function SmokePage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [showLogModal, setShowLogModal] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
 
@@ -41,9 +92,9 @@ export default function SmokePage() {
     };
 
     const handleDeleteProfile = async () => {
-        if (!window.confirm('¿Estás seguro de que querés eliminar tus datos de fumador? Se borrará todo tu progreso y configuración.')) return;
         try {
             await smokeApi.deleteProfile();
+            setShowDeleteConfirm(false);
             navigate('/');
         } catch (err) {
             console.error(err);
@@ -195,7 +246,7 @@ export default function SmokePage() {
             <div className="mt-12 pt-8 border-t border-surface-700/30">
                 <p className="text-[10px] font-bold text-muted uppercase tracking-[0.2em] mb-4 text-center">Configuración</p>
                 <button
-                    onClick={handleDeleteProfile}
+                    onClick={() => setShowDeleteConfirm(true)}
                     className="w-full py-4 bg-accent-red/5 hover:bg-accent-red/10 border border-accent-red/20 rounded-2xl text-accent-red text-xs font-black uppercase tracking-widest transition-all active:scale-[0.98]"
                 >
                     ELIMINAR DATOS DE FUMADOR
@@ -266,6 +317,17 @@ export default function SmokePage() {
                     </div>
                 </div>
             )}
+            {/* CONFIRMACIÓN DE ELIMINACIÓN */}
+            <ConfirmModal
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={handleDeleteProfile}
+                title="¿Borrar perfil?"
+                description="¿Estás seguro? Se borrará TODO tu progreso, racha y configuración de Libre de Humo permanentemente."
+                confirmText="SÍ, BORRAR TODO"
+                cancelText="CANCELAR"
+                variant="danger"
+            />
         </div>
     );
 }
