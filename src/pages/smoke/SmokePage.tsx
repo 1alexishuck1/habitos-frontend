@@ -83,13 +83,6 @@ export default function SmokePage() {
                 </div>
                 <div className="flex gap-2">
                     <button
-                        onClick={handleDeleteProfile}
-                        className="p-2.5 bg-accent-red/10 rounded-xl text-accent-red hover:bg-accent-red/20 transition-colors"
-                        title="Eliminar datos de fumador"
-                    >
-                        <User size={20} />
-                    </button>
-                    <button
                         onClick={() => navigate('/smoke/onboarding')}
                         className="p-2.5 bg-surface-800 rounded-xl text-muted hover:text-white transition-colors"
                     >
@@ -141,7 +134,7 @@ export default function SmokePage() {
                         setSelectedTrigger(null);
                         setShowLogModal(true);
                     }}
-                    className="w-full py-5 bg-surface-700 hover:bg-surface-600 rounded-3xl text-sm font-black text-white flex items-center justify-center gap-3 border-2 border-accent-red/20 transition-all active:scale-95 shadow-xl shadow-black/20 group"
+                    className="w-full py-4 bg-surface-700 hover:bg-surface-600 rounded-3xl text-sm font-black text-white flex items-center justify-center gap-3 border-2 border-accent-red/20 transition-all active:scale-95 shadow-xl shadow-black/20 group"
                 >
                     <div className="w-10 h-10 bg-accent-red/20 rounded-xl flex items-center justify-center text-accent-red group-hover:scale-110 transition-transform">
                         <AlertCircle size={22} strokeWidth={2.5} />
@@ -198,19 +191,18 @@ export default function SmokePage() {
                 </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4">
+            {/* Danger Zone / Delete Profile */}
+            <div className="mt-12 pt-8 border-t border-surface-700/30">
+                <p className="text-[10px] font-bold text-muted uppercase tracking-[0.2em] mb-4 text-center">Configuración</p>
                 <button
-                    onClick={() => {
-                        setQuantity(1);
-                        setSelectedTrigger(null);
-                        setShowLogModal(true);
-                    }}
-                    className="flex-1 py-4 bg-surface-700 hover:bg-surface-600 rounded-2xl text-xs font-bold text-white flex items-center justify-center gap-2 border border-white/5 transition-all active:scale-95"
+                    onClick={handleDeleteProfile}
+                    className="w-full py-4 bg-accent-red/5 hover:bg-accent-red/10 border border-accent-red/20 rounded-2xl text-accent-red text-xs font-black uppercase tracking-widest transition-all active:scale-[0.98]"
                 >
-                    <AlertCircle size={16} className="text-accent-red" />
-                    REGISTRAR DESLIZ
+                    ELIMINAR DATOS DE FUMADOR
                 </button>
+                <p className="text-[9px] text-muted/50 text-center mt-3 leading-relaxed">
+                    Esta acción borrará permanentemente todo tu progreso, recompensas y configuración de la sección "Libre de Humo".
+                </p>
             </div>
 
             {/* MODAL PARA REGISTRO DE DESLIZ */}
