@@ -18,6 +18,9 @@ import SmokePage from '@/pages/smoke/SmokePage';
 import SmokeOnboardingPage from '@/pages/smoke/SmokeOnboardingPage';
 import SmokePanicPage from '@/pages/smoke/SmokePanicPage';
 import LandingPage from '@/pages/LandingPage';
+import PrivacyPolicy from '@/pages/legal/PrivacyPolicy';
+import TermsOfService from '@/pages/legal/TermsOfService';
+import SupportPage from '@/pages/legal/SupportPage';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
 import { initPushNotifications } from '@/services/pushNotifications';
@@ -66,6 +69,9 @@ export default function App() {
                 <Route path="/landing" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/privacidad" element={<PrivacyPolicy />} />
+                <Route path="/terminos" element={<TermsOfService />} />
+                <Route path="/soporte" element={<SupportPage />} />
 
                 {/* Main conditional route */}
                 <Route path="/" element={isLoggedIn ? <Layout /> : <LandingPage />}>

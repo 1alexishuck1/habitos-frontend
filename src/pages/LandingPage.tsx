@@ -309,9 +309,9 @@ export default function LandingPage() {
                     </div>
                     <p className="text-xs text-soft">© 2026 Hábitos App. Diseñado para la excelencia.</p>
                     <div className="flex items-center gap-6">
-                        <a href="#" className="text-xs text-soft hover:text-white">Privacidad</a>
-                        <a href="#" className="text-xs text-soft hover:text-white">Términos</a>
-                        <a href="#" className="text-xs text-soft hover:text-white">Soporte</a>
+                        <button onClick={() => navigate('/privacidad')} className="text-xs text-soft hover:text-white transition-colors">Privacidad</button>
+                        <button onClick={() => navigate('/terminos')} className="text-xs text-soft hover:text-white transition-colors">Términos</button>
+                        <button onClick={() => navigate('/soporte')} className="text-xs text-soft hover:text-white transition-colors">Soporte</button>
                     </div>
                 </div>
             </footer>
