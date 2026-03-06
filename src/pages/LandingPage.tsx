@@ -292,7 +292,6 @@ export default function LandingPage() {
                         </button>
                     </div>
                     <div className="mt-16 flex items-center justify-center gap-8 grayscale opacity-40">
-                        <div className="flex items-center gap-2"><Trophy size={18} /> <span className="font-bold">MVP 2026</span></div>
                         <div className="flex items-center gap-2"><ShieldCheck size={18} /> <span className="font-bold">100% Seguro</span></div>
                         <div className="flex items-center gap-2"><Dumbbell size={18} /> <span className="font-bold">Fitness Ready</span></div>
                     </div>
