@@ -140,15 +140,23 @@ export default function MobileMenu() {
 
                         if (visibleItems.length === 0) return null;
 
+                        // Check if category has any active notification
+                        const hasCategoryNotif = category.items.some(item => item.to === '/friends' && totalNotifs > 0);
+
                         return (
                             <div key={category.title} className="flex flex-col gap-2">
                                 <button
                                     onClick={() => toggleCategory(category.title)}
                                     className="flex items-center justify-between px-3 group"
                                 >
-                                    <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em] group-active:text-white/60 transition-colors">
-                                        {category.title}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em] group-active:text-white/60 transition-colors">
+                                            {category.title}
+                                        </span>
+                                        {!isOpen && hasCategoryNotif && (
+                                            <div className="w-1.5 h-1.5 rounded-full bg-accent-red animate-pulse" />
+                                        )}
+                                    </div>
                                     {!isOpen ? <ChevronRight size={12} className="text-muted" /> : <ChevronDown size={12} className="text-muted" />}
                                 </button>
 
