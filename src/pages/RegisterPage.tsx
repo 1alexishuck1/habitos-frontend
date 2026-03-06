@@ -11,7 +11,7 @@ export default function RegisterPage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { setTokens, setUser } = useAuthStore();
-    const [form, setForm] = useState({ email: '', password: '', name: '' });
+    const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -21,7 +21,12 @@ export default function RegisterPage() {
         setError('');
         setLoading(true);
         try {
-            const { data } = await authApi.register(form);
+            const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
+            const { data } = await authApi.register({
+                email: form.email,
+                password: form.password,
+                name: fullName
+            });
             setTokens(data.accessToken, data.refreshToken);
             if (data.user) setUser(data.user);
             navigate('/', { replace: true });
@@ -55,16 +60,29 @@ export default function RegisterPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-3">
-                    <div>
-                        <label className="block text-xs text-muted mb-1">{t('auth.name')}</label>
-                        <input
-                            type="text"
-                            className="input"
-                            placeholder="Tu nombre"
-                            value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            required
-                        />
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-xs text-muted mb-1">Nombre</label>
+                            <input
+                                type="text"
+                                className="input"
+                                placeholder="Ej: Juan"
+                                value={form.firstName}
+                                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-muted mb-1">Apellido</label>
+                            <input
+                                type="text"
+                                className="input"
+                                placeholder="Ej: Pérez"
+                                value={form.lastName}
+                                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                                required
+                            />
+                        </div>
                     </div>
 
                     <div>
