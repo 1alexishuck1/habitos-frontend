@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,11 +21,22 @@ export default function MobileMenu() {
     const user = useAuthStore((s) => s.user);
     const isAdmin = user?.id === '1c30001a-ba62-47f4-ad41-bbcdc137e221' && user?.email === 'huckalexis0@gmail.com';
 
-    // State for collapsible categories
-    const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+    // Find which category the current path belongs to
+    const initialExpandedCategory = useMemo(() => {
+        const activeCategory = NAV_CATEGORIES.find(cat =>
+            cat.items.some(item => {
+                if (item.to === '/') return location.pathname === '/';
+                return location.pathname.startsWith(item.to);
+            })
+        );
+        return activeCategory ? activeCategory.title : 'PRINCIPAL';
+    }, []);
+
+    // State for collapsible categories - single string for accordion behavior
+    const [expandedTitle, setexpandedTitle] = useState<string | null>(initialExpandedCategory);
 
     const toggleCategory = (title: string) => {
-        setCollapsed(prev => ({ ...prev, [title]: !prev[title] }));
+        setexpandedTitle(prev => prev === title ? null : title);
     };
 
     // Close menu on route change
@@ -111,7 +122,7 @@ export default function MobileMenu() {
                 {/* Nav categories */}
                 <div className="flex flex-col px-4 py-6 flex-1 overflow-y-auto scrollbar-hide gap-8">
                     {NAV_CATEGORIES.map((category) => {
-                        const isCollapsed = collapsed[category.title];
+                        const isOpen = expandedTitle === category.title;
                         const visibleItems = category.items.filter(item => !item.adminOnly || isAdmin);
 
                         if (visibleItems.length === 0) return null;
@@ -125,10 +136,10 @@ export default function MobileMenu() {
                                     <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em] group-active:text-white/60 transition-colors">
                                         {category.title}
                                     </span>
-                                    {isCollapsed ? <ChevronRight size={12} className="text-muted" /> : <ChevronDown size={12} className="text-muted" />}
+                                    {!isOpen ? <ChevronRight size={12} className="text-muted" /> : <ChevronDown size={12} className="text-muted" />}
                                 </button>
 
-                                {!isCollapsed && (
+                                {isOpen && (
                                     <div className="flex flex-col gap-1 mt-1 animate-slide-up">
                                         {visibleItems.map(({ to, icon: Icon, tKey }) => {
                                             const isFriends = to === '/friends';

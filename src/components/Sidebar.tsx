@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Flame, LogOut, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
@@ -9,6 +9,7 @@ import { NAV_CATEGORIES } from '@/constants/navigation';
 export default function Sidebar() {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const location = useLocation();
     const logout = useAuthStore((s) => s.logout);
     const pendingCount = useFriendNotifStore((s) => s.pendingCount);
     const unreadMessages = useFriendNotifStore((s) => s.unreadMessages);
@@ -17,11 +18,22 @@ export default function Sidebar() {
     const user = useAuthStore((s) => s.user);
     const isAdmin = user?.id === '1c30001a-ba62-47f4-ad41-bbcdc137e221' && user?.email === 'huckalexis0@gmail.com';
 
-    // State for collapsible categories
-    const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+    // Find which category the current path belongs to
+    const initialExpandedCategory = useMemo(() => {
+        const activeCategory = NAV_CATEGORIES.find(cat =>
+            cat.items.some(item => {
+                if (item.to === '/') return location.pathname === '/';
+                return location.pathname.startsWith(item.to);
+            })
+        );
+        return activeCategory ? activeCategory.title : 'PRINCIPAL';
+    }, []); // Only on mount to establish start state
+
+    // State for collapsible categories - single string for accordion behavior
+    const [expandedTitle, setexpandedTitle] = useState<string | null>(initialExpandedCategory);
 
     const toggleCategory = (title: string) => {
-        setCollapsed(prev => ({ ...prev, [title]: !prev[title] }));
+        setexpandedTitle(prev => prev === title ? null : title);
     };
 
     function handleLogout() {
@@ -45,7 +57,7 @@ export default function Sidebar() {
             {/* Nav links categorized */}
             <nav className="flex flex-col gap-6 px-4 flex-1 overflow-y-auto scrollbar-hide">
                 {NAV_CATEGORIES.map((category) => {
-                    const isCollapsed = collapsed[category.title];
+                    const isOpen = expandedTitle === category.title;
                     const visibleItems = category.items.filter(item => !item.adminOnly || isAdmin);
 
                     if (visibleItems.length === 0) return null;
@@ -59,10 +71,10 @@ export default function Sidebar() {
                                 <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em] group-hover:text-white/60 transition-colors">
                                     {category.title}
                                 </span>
-                                {isCollapsed ? <ChevronRight size={10} className="text-muted" /> : <ChevronDown size={10} className="text-muted" />}
+                                {!isOpen ? <ChevronRight size={10} className="text-muted" /> : <ChevronDown size={10} className="text-muted" />}
                             </button>
 
-                            {!isCollapsed && (
+                            {isOpen && (
                                 <div className="flex flex-col gap-0.5 animate-fadeIn">
                                     {visibleItems.map(({ to, icon: Icon, tKey }) => {
                                         const isFriends = to === '/friends';
