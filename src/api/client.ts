@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 // Axios instance — attaches access token and handles 401 → refresh flow
 
 const API_URL = import.meta.env.VITE_API_URL || '';
+const API_SECRET = import.meta.env.VITE_API_SECRET || 'habitos-secret-key-1234';
 
 const api = axios.create({
     baseURL: API_URL || '/', // proxied by Vite in dev; set VITE_API_URL for prod
@@ -12,6 +13,7 @@ const api = axios.create({
 
 // Attach access token to every request
 api.interceptors.request.use((config) => {
+    config.headers['x-api-key'] = API_SECRET;
     const token = useAuthStore.getState().accessToken;
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
@@ -57,7 +59,9 @@ api.interceptors.response.use(
             const { refreshToken, setTokens } = useAuthStore.getState();
             if (!refreshToken) throw new Error('No refresh token');
 
-            const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+            const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken }, {
+                headers: { 'x-api-key': API_SECRET }
+            });
             setTokens(data.accessToken, data.refreshToken);
             processQueue(null, data.accessToken);
             original.headers.Authorization = `Bearer ${data.accessToken}`;
