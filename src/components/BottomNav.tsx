@@ -35,6 +35,19 @@ export default function MobileMenu() {
     // State for collapsible categories - single string for accordion behavior
     const [expandedTitle, setexpandedTitle] = useState<string | null>(initialExpandedCategory);
 
+    // Update expanded category when path changes (navigation)
+    useEffect(() => {
+        const activeCategory = NAV_CATEGORIES.find(cat =>
+            cat.items.some(item => {
+                if (item.to === '/') return location.pathname === '/';
+                return location.pathname.startsWith(item.to);
+            })
+        );
+        if (activeCategory) {
+            setexpandedTitle(activeCategory.title);
+        }
+    }, [location.pathname]);
+
     const toggleCategory = (title: string) => {
         setexpandedTitle(prev => prev === title ? null : title);
     };
