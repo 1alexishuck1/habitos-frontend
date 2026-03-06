@@ -11,8 +11,7 @@ import { Habit, Task } from '@/types';
 import { CATEGORIES, resolveCategory, getCategoryMeta } from './HabitsPage';
 import { addDays, format, isSameDay, isBefore, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { authApi } from '@/api/auth';
-import { ExperienceLog } from '@/types';
+
 
 function HabitRow({ habit, onCheck, onUncheck, disabled, onCounterClick }: { habit: Habit; onCheck: (id: string, completed: boolean) => void; onUncheck: (id: string) => void; disabled?: boolean; onCounterClick: (habit: Habit) => void }) {
     return (
@@ -95,7 +94,6 @@ export default function DashboardPage() {
     const [habits, setHabits] = useState<Habit[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [gymDay, setGymDay] = useState<WorkoutDay | null>(null);
-    const [xpLogs, setXpLogs] = useState<ExperienceLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [showPushBanner, setShowPushBanner] = useState(false);
 
@@ -111,12 +109,10 @@ export default function DashboardPage() {
             habitApi.getToday(dateStr),
             taskApi.getToday(dateStr),
             gymApi.getDay(dayOfWeekKey).catch(() => null),
-            authApi.experienceLogs().catch(() => ({ data: [] })),
-        ]).then(([h, ta, g, xp]) => {
+        ]).then(([h, ta, g]) => {
             setHabits(h.data);
             setTasks(ta.data);
             setGymDay(g);
-            setXpLogs(xp.data || []);
         }).finally(() => setLoading(false));
     }, [dateStr]);
 
@@ -150,7 +146,6 @@ export default function DashboardPage() {
                 maxStreak: data.maxStreak
             } : h));
             refreshUser();
-            authApi.experienceLogs().then(r => setXpLogs(r.data)).catch(() => { });
         } catch { /* handled */ }
     };
 
@@ -160,7 +155,6 @@ export default function DashboardPage() {
             await habitApi.log(id, { value: 1, dateStr });
             setHabits(prev => prev.map(h => h.id === id ? { ...h, todayCompleted: true, todayValue: (h.todayValue ?? 0) + 1 } : h));
             refreshUser();
-            authApi.experienceLogs().then(r => setXpLogs(r.data)).catch(() => { });
         } catch { /* handled by api layer */ }
     };
 
@@ -357,38 +351,7 @@ export default function DashboardPage() {
                 );
             })()}
 
-            {/* Experience Section */}
-            <div className="card mb-6 bg-surface-800">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                            <span className="text-primary-400">⚡</span> Tu Progreso
-                        </h2>
-                        <p className="text-xs text-soft mt-0.5">Nivel {user?.level ?? 1}</p>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-sm font-bold text-white">{(user?.experience ?? 0) % 100} / 100 XP</span>
-                    </div>
-                </div>
-                <div className="h-2 rounded-full bg-surface-700/50 overflow-hidden mb-4 border border-white/5">
-                    <div className="h-full rounded-full bg-gradient-to-r from-primary-600 via-primary-400 to-accent-amber transition-all duration-1000 ease-out"
-                        style={{ width: `${(user?.experience ?? 0) % 100}%` }} />
-                </div>
-
-                {/* Logs */}
-                <div className="space-y-2 mt-4 max-h-[160px] overflow-y-auto no-scrollbar">
-                    {xpLogs.length === 0 ? (
-                        <p className="text-xs text-soft text-center py-2">No hay experiencia ganada aún.</p>
-                    ) : (
-                        xpLogs.filter(l => isSameDay(new Date(l.createdAt), selectedDate)).map(log => (
-                            <div key={log.id} className="flex justify-between items-center py-2 border-b border-surface-700/30 last:border-0">
-                                <span className="text-xs text-soft">{log.reason}</span>
-                                <span className="text-xs font-bold text-accent-amber">+{log.amount} XP</span>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
+            {/* Removed Experience Section for new Progress Page */}
 
             {loading ? (
                 <div className="text-center py-12 text-muted animate-pulse-soft">{t('common.loading')}</div>
@@ -489,22 +452,29 @@ export default function DashboardPage() {
                             </div>
 
                             <div className="flex-1 flex flex-col justify-center items-center px-6 pb-8 pt-2 z-10">
-                                <div className="flex items-center gap-6">
-                                    <button
-                                        onClick={() => setCounterValue(counterValue - 1)}
-                                        className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg"
-                                    >
-                                        -
-                                    </button>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col gap-2">
+                                        <button onClick={() => setCounterValue(counterValue - 5)} className="w-10 h-10 bg-surface-700/50 hover:bg-surface-600 rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-90 text-white shadow">
+                                            -5
+                                        </button>
+                                        <button onClick={() => setCounterValue(counterValue - 1)} className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg">
+                                            -
+                                        </button>
+                                    </div>
                                     <span className={`text-5xl font-black tabular-nums leading-none w-28 text-center ${counterValue > 0 ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-accent-amber' : counterValue < 0 ? 'text-red-400' : 'text-white/20'}`}>
                                         {counterValue > 0 ? `+${counterValue}` : counterValue}
                                     </span>
-                                    <button
-                                        onClick={() => setCounterValue(counterValue + 1)}
-                                        className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg"
-                                    >
-                                        +
-                                    </button>
+                                    <div className="flex flex-col gap-2">
+                                        <button onClick={() => setCounterValue(counterValue + 5)} className="w-10 h-10 bg-surface-700/50 hover:bg-surface-600 rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-90 text-white shadow">
+                                            +5
+                                        </button>
+                                        <button onClick={() => setCounterValue(counterValue + 10)} className="w-10 h-10 bg-surface-700/50 hover:bg-surface-600 rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-90 text-white shadow">
+                                            +10
+                                        </button>
+                                        <button onClick={() => setCounterValue(counterValue + 1)} className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg">
+                                            +
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

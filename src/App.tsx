@@ -7,6 +7,7 @@ import RegisterPage from '@/pages/RegisterPage';
 import DashboardPage from '@/pages/DashboardPage';
 import HabitsPage from '@/pages/HabitsPage';
 import TasksPage from '@/pages/TasksPage';
+import ProgressPage from '@/pages/ProgressPage';
 import StatsPage from '@/pages/StatsPage';
 import DiaryPage from '@/pages/DiaryPage';
 import SettingsPage from '@/pages/SettingsPage';
@@ -65,6 +66,7 @@ export default function App() {
                     <Route index element={<DashboardPage />} />
                     <Route path="habits" element={<HabitsPage />} />
                     <Route path="tasks" element={<TasksPage />} />
+                    <Route path="progress" element={<ProgressPage />} />
                     <Route path="stats" element={<StatsPage />} />
                     <Route path="diary" element={<DiaryPage />} />
                     <Route path="settings" element={<SettingsPage />} />

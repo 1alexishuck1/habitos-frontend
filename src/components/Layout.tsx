@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import MobileMenu from './BottomNav';
 import Sidebar from './Sidebar';
 import IosInstallBanner from './IosInstallBanner';
+import XPToast from './XPToast';
 import { onSSE } from '@/services/sseConnection';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
 import * as friendsApi from '@/api/friends';
@@ -64,6 +65,9 @@ export default function Layout() {
                     <p className="text-sm font-semibold text-white text-center whitespace-pre-wrap">{toast}</p>
                 </div>
             )}
+
+            {/* XP Animation */}
+            <XPToast />
         </div>
     );
 }
