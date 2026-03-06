@@ -15,11 +15,11 @@ const navItems = [
     { to: '/habits', icon: Flame, tKey: 'nav.habits' },
     { to: '/tasks', icon: CheckSquare, tKey: 'nav.tasks' },
     { to: '/progress', icon: Zap, tKey: 'nav.progress' },
+    { to: '/smoke', icon: Wind, tKey: 'nav.smoke' },
     { to: '/stats', icon: BarChart2, tKey: 'nav.stats' },
     { to: '/diary', icon: Book, tKey: 'nav.diary' },
     { to: '/friends', icon: Users, tKey: 'nav.friends' },
     { to: '/gym', icon: Dumbbell, tKey: 'nav.gym' },
-    { to: '/smoke', icon: Wind, tKey: 'nav.smoke' },
     { to: '/settings', icon: Settings, tKey: 'nav.settings' },
 ];
 
