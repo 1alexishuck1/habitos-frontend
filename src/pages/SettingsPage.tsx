@@ -295,8 +295,14 @@ export default function SettingsPage() {
 
             {/* Custom Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-950/80 backdrop-blur-md animate-fade-in">
-                    <div className="bg-surface-900 border border-red-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative animate-slide-up">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-950/80 backdrop-blur-md animate-fade-in"
+                    onClick={() => !isDeleting && setShowDeleteModal(false)}
+                >
+                    <div
+                        className="bg-surface-900 border border-red-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative animate-slide-up"
+                        onClick={e => e.stopPropagation()}
+                    >
                         <button
                             onClick={() => setShowDeleteModal(false)}
                             className="absolute top-4 right-4 text-surface-400 hover:text-white transition-colors"
