@@ -167,7 +167,7 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
     const [selectedTemplate, setSelectedTemplate] = useState<HabitTemplate | null>(null);
     const [form, setForm] = useState({
         name: '', type: 'CHECK' as 'CHECK' | 'COUNTER', frequencyType: 'DAILY',
-        frequencyDays: [] as number[], description: '', category: '', goalValue: 1
+        frequencyDays: [] as number[], description: '', category: '', goalValue: 1 as number | string
     });
     const [loading, setLoading] = useState(false);
 
@@ -209,7 +209,7 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
                 templateId: selectedTemplate.id,
                 name: selectedTemplate.name,
                 type: selectedTemplate.type,
-                goalValue: selectedTemplate.type === 'COUNTER' ? form.goalValue : undefined,
+                goalValue: selectedTemplate.type === 'COUNTER' ? Number(form.goalValue) || 1 : undefined,
                 frequencyType: form.frequencyType,
                 frequencyDays: form.frequencyType === 'SPECIFIC_DAYS' ? form.frequencyDays : undefined,
                 description: selectedTemplate.description ?? '',
@@ -223,8 +223,8 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
         e.preventDefault();
         setLoading(true);
         try {
-            const payload = { ...form, category: form.category || undefined, goalValue: form.type === 'COUNTER' ? form.goalValue : undefined };
-            const { data } = await habitApi.create(payload);
+            const payload = { ...form, category: form.category || undefined, goalValue: form.type === 'COUNTER' ? Number(form.goalValue) || 1 : undefined };
+            const { data } = await habitApi.create(payload as any);
             onCreate(data);
         } finally { setLoading(false); }
     };
@@ -315,7 +315,10 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
                             {selectedTemplate.type === 'COUNTER' && (
                                 <div>
                                     <label className="block text-sm text-soft mb-1.5">Cantidad Objetivo</label>
-                                    <input type="number" min="1" className="input" value={form.goalValue} onChange={e => setForm({ ...form, goalValue: parseInt(e.target.value) || 1 })} required />
+                                    <input type="number" min="1" className="input" value={form.goalValue} onChange={e => {
+                                        const val = e.target.value.replace(/[^0-9]/g, '');
+                                        setForm({ ...form, goalValue: val === '' ? '' : parseInt(val) })
+                                    }} required />
                                 </div>
                             )}
 
@@ -416,7 +419,10 @@ function CreateHabitModal({ templates, onClose, onCreate }: {
                         {form.type === 'COUNTER' && (
                             <div>
                                 <label className="block text-sm text-soft mb-1.5">Cantidad Objetivo</label>
-                                <input type="number" min="1" className="input" value={form.goalValue} onChange={e => setForm({ ...form, goalValue: parseInt(e.target.value) || 1 })} required />
+                                <input type="number" min="1" className="input" value={form.goalValue} onChange={e => {
+                                    const val = e.target.value.replace(/[^0-9]/g, '');
+                                    setForm({ ...form, goalValue: val === '' ? '' : parseInt(val) })
+                                }} required />
                             </div>
                         )}
 
