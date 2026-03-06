@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Globe, LogOut, User, Bell, BellOff, BellRing, Smartphone } from 'lucide-react';
+import { Globe, LogOut, User, Bell, BellOff, BellRing, Smartphone, Trash2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/api/auth';
 import { useNavigate } from 'react-router-dom';
@@ -203,6 +203,20 @@ export default function SettingsPage() {
         localStorage.setItem('lang', lang);
     };
 
+    const handleDeleteAccount = async () => {
+        const confirmDelete = window.confirm("¿Estás seguro de que querés ELIMINAR tu cuenta permanentemente? Perderás todos tus hábitos, puntos de experiencia, rachas y configuración. Esta acción no se puede deshacer.");
+        if (!confirmDelete) return;
+
+        try {
+            await authApi.deleteAccount();
+            logout();
+            navigate('/register', { replace: true });
+        } catch (error) {
+            console.error("Error al eliminar la cuenta:", error);
+            alert("Ocurrió un error al intentar eliminar la cuenta. Por favor intentá más tarde.");
+        }
+    };
+
     return (
         <div className="page-content animate-fade-in">
             <h1 className="section-title text-xl mb-6">{t('settings.title')}</h1>
@@ -243,9 +257,28 @@ export default function SettingsPage() {
             </div>
 
             {/* Logout */}
-            <button onClick={handleLogout} className="btn-danger w-full flex items-center justify-center gap-2 py-2.5 mt-2 text-sm">
+            <button onClick={handleLogout} className="btn-danger w-full flex items-center justify-center gap-2 py-2.5 mt-2 mb-8 text-sm">
                 <LogOut size={15} /> {t('auth.logout')}
             </button>
+
+            {/* Danger Zone: Delete Account */}
+            <div className="card mb-4 border border-red-500/20 bg-red-500/5">
+                <div className="flex items-start gap-4 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                        <Trash2 size={20} className="text-red-400" />
+                    </div>
+                    <div>
+                        <p className="font-bold text-red-400 text-sm">Eliminar cuenta</p>
+                        <p className="text-xs text-soft mt-1">Borrar permanentemente todos tus datos, progreso y configuración.</p>
+                    </div>
+                </div>
+                <button
+                    onClick={handleDeleteAccount}
+                    className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 font-bold px-4 py-2.5 rounded-xl transition-colors text-sm"
+                >
+                    Eliminar cuenta permanentemente
+                </button>
+            </div>
 
             <p className="text-center text-xs text-muted mt-8">v1.0.0 · Hábitos App</p>
         </div>

@@ -40,10 +40,10 @@ export default function SupportPage() {
                         <h2 className="text-2xl font-bold text-white mb-2">Escribinos directamente</h2>
                         <p className="text-surface-400 mb-6 leading-relaxed">Respondemos correos de lunes a viernes en menos de 24 horas hábiles.</p>
                         <a
-                            href="mailto:soporte@habitos.app"
+                            href="mailto:huckalexis0@gmail.com"
                             className="inline-flex items-center font-bold text-primary-400 hover:text-primary-300 transition-colors gap-2"
                         >
-                            soporte@habitos.app <ArrowLeft size={16} className="rotate-180" />
+                            huckalexis0@gmail.com <ArrowLeft size={16} className="rotate-180" />
                         </a>
                     </div>
 
@@ -53,7 +53,7 @@ export default function SupportPage() {
                         <h2 className="text-2xl font-bold text-white mb-2">Pedir nueva función</h2>
                         <p className="text-surface-400 mb-6 leading-relaxed">¿Querés proponer un premio nuevo o una mejora en la gamificación?</p>
                         <a
-                            href="mailto:feedback@habitos.app"
+                            href="mailto:huckalexis0@gmail.com"
                             className="inline-flex items-center font-bold text-accent-amber hover:text-accent-amber/80 transition-colors gap-2"
                         >
                             Dejar feedback <ArrowLeft size={16} className="rotate-180" />

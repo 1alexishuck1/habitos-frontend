@@ -19,6 +19,9 @@ export const authApi = {
     me: () =>
         api.get<User>('/auth/me'),
 
+    deleteAccount: () =>
+        api.delete('/auth/me'),
+
     experienceLogs: () =>
         api.get<import('@/types').ExperienceLog[]>('/auth/me/experience'),
 };

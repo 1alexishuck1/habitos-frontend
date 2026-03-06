@@ -39,7 +39,7 @@ export default function TermsOfService() {
                         <h2 className="text-2xl font-bold text-white mb-4">2. Requisitos de la Cuenta</h2>
                         <p className="mb-3">Para crear una cuenta y disfrutar de las funciones de la Aplicación, aceptas que:</p>
                         <ul className="list-disc pl-6 space-y-2 text-surface-300">
-                            <li>Eres mayor de 13 años (o la edad mínima legal en tu país).</li>
+                            <li>Eres mayor de 13 años.</li>
                             <li>Toda la información que proporciones será veraz, precisa y completa.</li>
                             <li>Mantendrás la seguridad y confidencialidad de tu contraseña.</li>
                             <li>Aceptas la responsabilidad de todas las actividades que ocurran bajo tu cuenta y contraseña.</li>
