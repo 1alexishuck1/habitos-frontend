@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
     Users, UserPlus, Bell, Search, Check, X,
     Flame, CheckSquare, Trophy, Clock, UserCheck, ChevronDown, ChevronUp, Loader2, UserMinus, Zap
@@ -570,6 +570,8 @@ export default function FriendsPage() {
         toastTimer.current = setTimeout(() => setToast(null), 4000);
     }
 
+    const unreadMessages = useFriendNotifStore((s) => s.unreadMessages);
+
     // Load friends
     const loadFriends = useCallback(async () => {
         setFriendsLoading(true);
@@ -602,6 +604,17 @@ export default function FriendsPage() {
         loadFriends();
         loadRequests();
     }, [loadFriends, loadRequests]);
+
+    const sortedFriends = useMemo(() => {
+        if (!Array.isArray(friends)) return [];
+        return [...friends].sort((a, b) => {
+            const aHasUnread = unreadMessages.some(m => m.senderId === a.friend.id);
+            const bHasUnread = unreadMessages.some(m => m.senderId === b.friend.id);
+            if (aHasUnread && !bHasUnread) return -1;
+            if (!aHasUnread && bHasUnread) return 1;
+            return 0;
+        });
+    }, [friends, unreadMessages]);
     // ─── Component auto-updates ──────────────────────────────────────────────
     const globalPendingCount = useFriendNotifStore((s) => s.pendingCount);
     useEffect(() => {
@@ -1299,7 +1312,7 @@ export default function FriendsPage() {
                             </div>
                         )}
 
-                        {(Array.isArray(friends) ? friends : []).map(f => (
+                        {sortedFriends.map(f => (
                             <FriendCard
                                 key={f.friendshipId}
                                 entry={f}
