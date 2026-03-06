@@ -452,27 +452,33 @@ export default function DashboardPage() {
                             </div>
 
                             <div className="flex-1 flex flex-col justify-center items-center px-6 pb-8 pt-2 z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex flex-col gap-2">
-                                        <button onClick={() => setCounterValue(counterValue - 5)} className="w-10 h-10 bg-surface-700/50 hover:bg-surface-600 rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-90 text-white shadow">
-                                            -5
-                                        </button>
-                                        <button onClick={() => setCounterValue(counterValue - 1)} className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg">
+                                <div className="flex flex-col items-center gap-6">
+                                    <div className="flex items-center gap-6">
+                                        <button
+                                            onClick={() => setCounterValue(counterValue - 1)}
+                                            className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg"
+                                        >
                                             -
                                         </button>
-                                    </div>
-                                    <span className={`text-5xl font-black tabular-nums leading-none w-28 text-center ${counterValue > 0 ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-accent-amber' : counterValue < 0 ? 'text-red-400' : 'text-white/20'}`}>
-                                        {counterValue > 0 ? `+${counterValue}` : counterValue}
-                                    </span>
-                                    <div className="flex flex-col gap-2">
-                                        <button onClick={() => setCounterValue(counterValue + 5)} className="w-10 h-10 bg-surface-700/50 hover:bg-surface-600 rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-90 text-white shadow">
-                                            +5
-                                        </button>
-                                        <button onClick={() => setCounterValue(counterValue + 10)} className="w-10 h-10 bg-surface-700/50 hover:bg-surface-600 rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-90 text-white shadow">
-                                            +10
-                                        </button>
-                                        <button onClick={() => setCounterValue(counterValue + 1)} className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg">
+                                        <span className={`text-5xl font-black tabular-nums leading-none w-28 text-center ${counterValue > 0 ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-accent-amber' : counterValue < 0 ? 'text-red-400' : 'text-white/20'}`}>
+                                            {counterValue > 0 ? `+${counterValue}` : counterValue}
+                                        </span>
+                                        <button
+                                            onClick={() => setCounterValue(counterValue + 1)}
+                                            className="w-14 h-14 bg-surface-700 hover:bg-surface-600 rounded-full flex items-center justify-center text-3xl font-bold transition-all active:scale-90 border border-surface-600/50 text-white shadow-lg"
+                                        >
                                             +
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <button onClick={() => setCounterValue(counterValue - 5)} className="px-4 py-2 bg-surface-700/50 hover:bg-surface-600 rounded-xl flex items-center justify-center text-sm font-bold transition-all active:scale-90 text-white shadow border border-surface-600/30">
+                                            - 5
+                                        </button>
+                                        <button onClick={() => setCounterValue(counterValue + 5)} className="px-4 py-2 bg-surface-700/50 hover:bg-surface-600 rounded-xl flex items-center justify-center text-sm font-bold transition-all active:scale-90 text-white shadow border border-surface-600/30">
+                                            + 5
+                                        </button>
+                                        <button onClick={() => setCounterValue(counterValue + 10)} className="px-4 py-2 bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 border border-primary-500/20 rounded-xl flex items-center justify-center text-sm font-bold transition-all active:scale-90 shadow">
+                                            + 10
                                         </button>
                                     </div>
                                 </div>
