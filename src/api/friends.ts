@@ -3,6 +3,7 @@ import api from './client';
 export interface UserResult {
     id: string;
     name: string;
+    avatarUrl?: string;
 }
 
 export interface FriendRequest {

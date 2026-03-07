@@ -12,6 +12,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { habitApi } from '@/api/habits';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Panel = 'friends' | 'search' | 'requests';
@@ -103,7 +105,17 @@ function FriendCard({ entry, onRemove, onMotivate, onCopyHabit }: {
         <div className="friend-card">
             {/* Top row: avatar + info + chevron */}
             <div className="friend-card-top" onClick={toggleExpand}>
-                <Link to={`/profile/${friend.id}`} className="friend-avatar" onClick={e => e.stopPropagation()}>{initials}</Link>
+                <Link to={`/profile/${friend.id}`} className="friend-avatar overflow-hidden" onClick={e => e.stopPropagation()}>
+                    {friend.avatarUrl ? (
+                        <img
+                            src={friend.avatarUrl.startsWith('http') ? friend.avatarUrl : `${API_URL}${friend.avatarUrl}`}
+                            className="w-full h-full object-cover"
+                            alt={friend.name}
+                        />
+                    ) : (
+                        initials
+                    )}
+                </Link>
                 <div className="friend-info">
                     <Link to={`/profile/${friend.id}`} className="friend-name hover:text-primary-400 transition-colors" onClick={e => e.stopPropagation()}>
                         {friend.name}
@@ -269,7 +281,17 @@ function RequestCard({
     const initials = request.sender.name.slice(0, 2).toUpperCase();
     return (
         <div className="request-card">
-            <Link to={`/profile/${request.sender.id}`} className="friend-avatar request-avatar">{initials}</Link>
+            <Link to={`/profile/${request.sender.id}`} className="friend-avatar request-avatar overflow-hidden">
+                {request.sender.avatarUrl ? (
+                    <img
+                        src={request.sender.avatarUrl.startsWith('http') ? request.sender.avatarUrl : `${API_URL}${request.sender.avatarUrl}`}
+                        className="w-full h-full object-cover"
+                        alt={request.sender.name}
+                    />
+                ) : (
+                    initials
+                )}
+            </Link>
             <div className="request-info">
                 <Link to={`/profile/${request.sender.id}`} className="friend-name hover:text-primary-400 transition-colors">
                     {request.sender.name}
@@ -315,7 +337,17 @@ function SearchResult({
     const initials = user.name.slice(0, 2).toUpperCase();
     return (
         <div className="search-result">
-            <Link to={`/profile/${user.id}`} className="friend-avatar search-avatar">{initials}</Link>
+            <Link to={`/profile/${user.id}`} className="friend-avatar search-avatar overflow-hidden">
+                {user.avatarUrl ? (
+                    <img
+                        src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `${API_URL}${user.avatarUrl}`}
+                        className="w-full h-full object-cover"
+                        alt={user.name}
+                    />
+                ) : (
+                    initials
+                )}
+            </Link>
             <Link to={`/profile/${user.id}`} className="search-name hover:text-primary-400 transition-colors">
                 {user.name}
             </Link>
@@ -469,8 +501,16 @@ function ChatModal({
 
                 {/* Header */}
                 <div className="p-4 border-b border-surface-700 font-bold text-white flex items-center gap-3">
-                    <Link to={`/profile/${friend.id}`} className="friend-avatar w-10 h-10 text-[xs] rounded-full" style={{ width: 40, height: 40, fontSize: '0.75rem' }}>
-                        {friend.name.slice(0, 2).toUpperCase()}
+                    <Link to={`/profile/${friend.id}`} className="friend-avatar w-10 h-10 text-[xs] rounded-full overflow-hidden" style={{ width: 40, height: 40, fontSize: '0.75rem' }}>
+                        {friend.avatarUrl ? (
+                            <img
+                                src={friend.avatarUrl.startsWith('http') ? friend.avatarUrl : `${API_URL}${friend.avatarUrl}`}
+                                className="w-full h-full object-cover"
+                                alt={friend.name}
+                            />
+                        ) : (
+                            friend.name.slice(0, 2).toUpperCase()
+                        )}
                     </Link>
                     <Link to={`/profile/${friend.id}`} className="hover:text-primary-400 transition-colors text-white" style={{ textDecoration: 'none' }}>
                         {friend.name}
