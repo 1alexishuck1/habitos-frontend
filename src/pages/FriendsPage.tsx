@@ -137,7 +137,7 @@ function FriendCard({ entry, onRemove, onMotivate, onCopyHabit }: {
                     </div>
                 </div>
                 <button
-                    className="btn-motivate relative flex items-center gap-1.5 px-3 py-1.5 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 rounded-xl transition-all border border-primary-500/20"
+                    className="btn-motivate relative flex items-center justify-center w-10 h-10 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 rounded-xl transition-all border border-primary-500/20"
                     onClick={(e) => {
                         e.stopPropagation();
                         onMotivate(entry);
@@ -145,12 +145,11 @@ function FriendCard({ entry, onRemove, onMotivate, onCopyHabit }: {
                     title={t('friends.sendMotivation')}
                 >
                     <div className="relative">
-                        <MessageCircle size={16} />
+                        <MessageCircle size={18} />
                         <div className="absolute -top-1 -right-1 bg-surface-800 rounded-full p-0.5">
-                            <Zap size={8} className="fill-current text-accent-amber" />
+                            <Zap size={9} className="fill-current text-accent-amber" />
                         </div>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-tight hidden sm:inline">Motivar</span>
                     {unreadCount > 0 && (
                         <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-accent-red flex items-center justify-center text-[9px] font-bold text-white shadow-sm ring-2 ring-surface-800">
                             {unreadCount > 9 ? '9+' : unreadCount}
