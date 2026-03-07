@@ -32,6 +32,7 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [showAvatarModal, setShowAvatarModal] = useState(false);
+    const [avatarUpdateKey, setAvatarUpdateKey] = useState(Date.now());
     const [toast, setToast] = useState<{ msg: string, type: 'success' | 'error' } | null>(null);
 
     const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -121,6 +122,7 @@ export default function ProfilePage() {
                 const updatedUser = { ...currentUser, avatarUrl: data.avatar_url };
                 setUser(updatedUser);
                 setViewUser(updatedUser);
+                setAvatarUpdateKey(Date.now());
             }
             showToast('¡Avatar actualizado! ✨');
         } catch (error: any) {
@@ -159,7 +161,7 @@ export default function ProfilePage() {
                                 <img
                                     src={viewUser.avatarUrl.startsWith('http')
                                         ? viewUser.avatarUrl
-                                        : `${API_URL}${viewUser.avatarUrl}?t=${isMe ? Date.now() : '1'}`}
+                                        : `${API_URL}${viewUser.avatarUrl}?t=${isMe ? avatarUpdateKey : '1'}`}
                                     alt={viewUser.name}
                                     className="w-full h-full object-cover"
                                 />
