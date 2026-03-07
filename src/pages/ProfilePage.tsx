@@ -101,10 +101,10 @@ export default function ProfilePage() {
     };
 
     const handleAvatarClick = () => {
-        if (isMe) {
-            fileInputRef.current?.click();
-        } else if (viewUser?.avatarUrl) {
+        if (viewUser?.avatarUrl) {
             setShowAvatarModal(true);
+        } else if (isMe) {
+            fileInputRef.current?.click();
         }
     };
 
@@ -166,7 +166,11 @@ export default function ProfilePage() {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <User size={48} className="text-white/20" />
+                                <div className="w-full h-full bg-gradient-to-br from-surface-600 to-surface-800 flex items-center justify-center">
+                                    <span className="text-3xl font-black text-white/20 uppercase">
+                                        {viewUser?.name?.charAt(0)}
+                                    </span>
+                                </div>
                             )}
                             {isMe && (
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -176,7 +180,10 @@ export default function ProfilePage() {
                             <div className="absolute inset-0 bg-primary-500/10 mix-blend-overlay" />
                         </div>
                         {isMe && (
-                            <button className="absolute bottom-0 right-0 p-2 bg-primary-500 rounded-full text-white shadow-lg transform transition-transform hover:scale-110 active:scale-95">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                                className="absolute bottom-0 right-0 p-2 bg-primary-500 rounded-full text-white shadow-lg transform transition-transform hover:scale-110 active:scale-95 z-10"
+                            >
                                 <Camera size={16} />
                             </button>
                         )}
