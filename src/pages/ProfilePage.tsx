@@ -244,7 +244,7 @@ export default function ProfilePage() {
                         <Flame size={18} />
                     </div>
                     <span className="text-lg font-black text-white">{stats.habitsDoneCount}</span>
-                    <span className="text-[10px] font-bold text-muted uppercase tracking-tighter">Días Logrados</span>
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-tighter">Hábitos Completados</span>
                 </div>
                 <div className="card-stats bg-surface-800/40 border-surface-700/50 p-4 rounded-2xl flex flex-col items-center text-center">
                     <div className="w-8 h-8 rounded-xl bg-accent-green/10 text-accent-green flex items-center justify-center mb-2">
