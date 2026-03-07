@@ -25,11 +25,16 @@ export default function ProgressPage() {
     // Group logs by day
     const groupedLogs: Record<string, ExperienceLog[]> = {};
     for (const log of xpLogs) {
-        // Use local timezone formatting for grouping
-        const dateStr = format(new Date(log.createdAt), 'yyyy-MM-dd');
+        // Handle BOTH full timestamps (tasks) and UTC midnight dates (habits)
+        // If it's 00:00:00.000Z, we want the literal date part (backend used it as a "day" marker)
+        // Otherwise use local formatting to keep the user's local day
+        const dateStr = log.createdAt.includes('T00:00:00')
+            ? log.createdAt.split('T')[0]
+            : format(new Date(log.createdAt), 'yyyy-MM-dd');
+
         if (!groupedLogs[dateStr]) groupedLogs[dateStr] = [];
 
-        // Deduplicate identical reasons on the same day
+        // Deduplicate identical reasons on the same day (e.g. from rapid duplicate clicks)
         const isDuplicate = groupedLogs[dateStr].some(existing => existing.reason === log.reason);
         if (!isDuplicate) {
             groupedLogs[dateStr].push(log);
