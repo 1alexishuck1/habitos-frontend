@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
     Users, UserPlus, Bell, Search, Check, X,
     Flame, CheckSquare, Trophy, Clock, UserCheck, ChevronDown, ChevronUp, Loader2, UserMinus, Zap,
-    MessageCircle, Heart
+    MessageCircle
 } from 'lucide-react';
 import * as friendsApi from '@/api/friends';
 import type { FriendEntry, FriendRequest, UserResult, ActivityItem, FriendMessage } from '@/api/friends';
