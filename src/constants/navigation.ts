@@ -1,4 +1,4 @@
-import { Home, Flame, CheckSquare, BarChart2, Book, Settings, Users, Dumbbell, Zap, ShieldCheck, Wind } from 'lucide-react';
+import { Home, Flame, CheckSquare, BarChart2, Book, Settings, Users, Dumbbell, Zap, ShieldCheck, Wind, User } from 'lucide-react';
 
 export const NAV_CATEGORIES = [
     {
@@ -33,6 +33,7 @@ export const NAV_CATEGORIES = [
     {
         title: 'AJUSTES',
         items: [
+            { to: '/profile', icon: User, tKey: 'nav.profile', id: 'profile' },
             { to: '/settings', icon: Settings, tKey: 'nav.settings', id: 'settings' },
             { to: '/admin', icon: ShieldCheck, tKey: 'Admin', id: 'admin', adminOnly: true },
         ]

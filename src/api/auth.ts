@@ -19,6 +19,12 @@ export const authApi = {
     me: () =>
         api.get<User>('/auth/me'),
 
+    updateProfile: (data: { name: string }) =>
+        api.patch<User>('/auth/me', data),
+
+    getProfileStats: () =>
+        api.get<{ friendsCount: number; habitsDoneCount: number; tasksDoneCount: number }>('/auth/me/stats'),
+
     deleteAccount: () =>
         api.delete('/auth/me'),
 

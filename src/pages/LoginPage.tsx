@@ -116,6 +116,17 @@ export default function LoginPage() {
                     </Link>
                 </p>
             </div>
+
+            {/* CTA for Landing/Benefits */}
+            <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '300ms' }}>
+                <Link
+                    to="/landing"
+                    className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-surface-800/50 border border-surface-700/50 hover:bg-surface-700/50 hover:border-primary-500/30 transition-all text-xs font-bold text-white/50 hover:text-white"
+                >
+                    <span>¿Todavía no estás convencido? Ver beneficios y demo</span>
+                    <Flame size={14} className="text-primary-500/40 group-hover:text-primary-400 group-hover:animate-pulse transition-colors" />
+                </Link>
+            </div>
         </div>
     );
 }

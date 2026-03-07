@@ -13,6 +13,7 @@ import AdminPage from '@/pages/AdminPage';
 import DiaryPage from '@/pages/DiaryPage';
 import SettingsPage from '@/pages/SettingsPage';
 import FriendsPage from '@/pages/FriendsPage';
+import ProfilePage from '@/pages/ProfilePage';
 import GymPage from '@/pages/GymPage';
 import SmokePage from '@/pages/smoke/SmokePage';
 import SmokeOnboardingPage from '@/pages/smoke/SmokeOnboardingPage';
@@ -95,6 +96,7 @@ export default function App() {
                     <Route path="settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                     <Route path="friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
                     <Route path="gym" element={<ProtectedRoute><GymPage /></ProtectedRoute>} />
+                    <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                     <Route path="admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
                     <Route path="smoke" element={<ProtectedRoute><SmokePage /></ProtectedRoute>} />
                     <Route path="smoke/onboarding" element={<ProtectedRoute><SmokeOnboardingPage /></ProtectedRoute>} />
