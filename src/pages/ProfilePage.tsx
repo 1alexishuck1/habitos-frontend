@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Mail, Shield, Award, Users, CheckCircle2, Flame, Save, Loader2, Camera } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { User, Mail, Shield, Award, Users, CheckCircle2, Flame, Save, Loader2, Camera, UserPlus, Check } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/api/auth';
+import { sendFriendRequest } from '@/api/friends';
 
 export default function ProfilePage() {
     const { t } = useTranslation();
-    const { user, setUser } = useAuthStore();
+    const { userId } = useParams();
+    const { user: currentUser, setUser } = useAuthStore();
+
+    // Who are we viewing?
+    const isMe = !userId || userId === currentUser?.id;
+
+    // Profile data state
+    const [viewUser, setViewUser] = useState<any>(null);
+    const [friendshipStatus, setFriendshipStatus] = useState<'FRIENDS' | 'REQUEST_SENT' | 'REQUEST_RECEIVED' | 'NONE'>('NONE');
 
     const [stats, setStats] = useState({
         friendsCount: 0,
@@ -27,17 +37,44 @@ export default function ProfilePage() {
     };
 
     useEffect(() => {
-        if (user) {
-            const parts = user.name.split(' ');
+        setLoading(true);
+        if (isMe) {
+            setViewUser(currentUser);
+            const parts = currentUser?.name.split(' ') || [];
             setFirstName(parts[0] || '');
             setLastName(parts.slice(1).join(' ') || '');
-        }
 
-        authApi.getProfileStats()
-            .then(res => setStats(res.data))
-            .catch(() => { })
-            .finally(() => setLoading(false));
-    }, [user]);
+            authApi.getProfileStats()
+                .then(res => setStats(res.data))
+                .catch(() => { })
+                .finally(() => setLoading(false));
+        } else if (userId) {
+            authApi.getPublicProfile(userId)
+                .then(res => {
+                    setViewUser(res.data);
+                    setStats(res.data.stats);
+                    setFriendshipStatus(res.data.friendshipStatus);
+                })
+                .catch(() => {
+                    showToast('Usuario no encontrado', 'error');
+                })
+                .finally(() => setLoading(false));
+        }
+    }, [userId, isMe, currentUser]);
+
+    const handleAddFriend = async () => {
+        if (!userId) return;
+        setSaving(true);
+        try {
+            await sendFriendRequest(userId);
+            setFriendshipStatus('REQUEST_SENT');
+            showToast('Solicitud enviada 🚀');
+        } catch (error) {
+            showToast('Error al enviar solicitud', 'error');
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const handleSave = async () => {
         if (!firstName.trim()) {
@@ -58,7 +95,7 @@ export default function ProfilePage() {
         }
     };
 
-    if (loading && !user) {
+    if (loading && !viewUser) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <Loader2 className="animate-spin text-primary-500" size={32} />
@@ -83,19 +120,50 @@ export default function ProfilePage() {
                         </button>
                     </div>
 
-                    <h1 className="text-2xl font-black text-white mt-4">{user?.name}</h1>
-                    <p className="text-primary-400 font-bold text-xs uppercase tracking-widest mt-1">{t('habits.level', 'Nivel')} {user?.level}</p>
+                    <h1 className="text-2xl font-black text-white mt-4">{viewUser?.name}</h1>
+                    <p className="text-primary-400 font-bold text-xs uppercase tracking-widest mt-1">{t('habits.level', 'Nivel')} {viewUser?.level}</p>
+
+                    {/* Friend button for others */}
+                    {!isMe && (
+                        <div className="mt-6">
+                            {friendshipStatus === 'NONE' && (
+                                <button
+                                    onClick={handleAddFriend}
+                                    disabled={saving}
+                                    className="btn-primary px-8 py-2.5 flex items-center gap-2 rounded-2xl shadow-xl shadow-primary-500/20"
+                                >
+                                    {saving ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}
+                                    AGREGAR AMIGO
+                                </button>
+                            )}
+                            {friendshipStatus === 'REQUEST_SENT' && (
+                                <button disabled className="px-8 py-2.5 flex items-center gap-2 rounded-2xl bg-surface-700 text-soft text-xs font-bold border border-surface-600">
+                                    <Check size={16} /> SOLICITUD ENVIADA
+                                </button>
+                            )}
+                            {friendshipStatus === 'FRIENDS' && (
+                                <button disabled className="px-8 py-2.5 flex items-center gap-2 rounded-2xl bg-accent-green/10 text-accent-green text-xs font-bold border border-accent-green/20">
+                                    <Users size={16} /> YA SON AMIGOS
+                                </button>
+                            )}
+                            {friendshipStatus === 'REQUEST_RECEIVED' && (
+                                <button disabled className="px-8 py-2.5 flex items-center gap-2 rounded-2xl bg-accent-amber/10 text-accent-amber text-xs font-bold border border-accent-amber/20">
+                                    <UserPlus size={16} /> TE ENVIÓ SOLICITUD
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     {/* XP Progress Bar */}
-                    <div className="w-full max-w-xs mt-4">
+                    <div className="w-full max-w-xs mt-6">
                         <div className="flex justify-between text-[10px] font-bold text-soft uppercase mb-1.5 px-1">
-                            <span>EXP: {(user?.experience ?? 0) % 100} / 100</span>
-                            <span>{100 - ((user?.experience ?? 0) % 100)} para nvl. {(user?.level ?? 1) + 1}</span>
+                            <span>EXP: {(viewUser?.experience ?? 0) % 100} / 100</span>
+                            <span>{100 - ((viewUser?.experience ?? 0) % 100)} para nvl. {(viewUser?.level ?? 1) + 1}</span>
                         </div>
                         <div className="h-1.5 rounded-full bg-surface-700/50 overflow-hidden border border-white/5">
                             <div
                                 className="h-full bg-gradient-to-r from-primary-600 via-primary-400 to-accent-amber transition-all duration-1000"
-                                style={{ width: `${(user?.experience ?? 0) % 100}%` }}
+                                style={{ width: `${(viewUser?.experience ?? 0) % 100}%` }}
                             />
                         </div>
                     </div>
@@ -108,7 +176,7 @@ export default function ProfilePage() {
                     <div className="w-8 h-8 rounded-xl bg-primary-500/10 text-primary-400 flex items-center justify-center mb-2">
                         <Award size={18} />
                     </div>
-                    <span className="text-lg font-black text-white">{user?.level}</span>
+                    <span className="text-lg font-black text-white">{viewUser?.level}</span>
                     <span className="text-[10px] font-bold text-muted uppercase tracking-tighter">Nivel</span>
                 </div>
                 <div className="card-stats bg-surface-800/40 border-surface-700/50 p-4 rounded-2xl flex flex-col items-center text-center">
@@ -134,78 +202,79 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            {/* Form Section */}
-            <div className="space-y-6">
-                <div className="card border-surface-700/50 bg-surface-800/40 backdrop-blur-md p-6">
-                    <h2 className="text-sm font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <User size={16} className="text-primary-400" /> Información Personal
-                    </h2>
+            {isMe && (
+                <div className="space-y-6">
+                    <div className="card border-surface-700/50 bg-surface-800/40 backdrop-blur-md p-6">
+                        <h2 className="text-sm font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <User size={16} className="text-primary-400" /> Información Personal
+                        </h2>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-2 ml-1">Nombre</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20">
-                                    <Shield size={16} />
-                                </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-2 ml-1">Nombre</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20">
+                                        <Shield size={16} />
+                                    </span>
+                                    <input
+                                        type="text"
+                                        className="input pl-10"
+                                        value={firstName}
+                                        onChange={e => setFirstName(e.target.value)}
+                                        placeholder="Tu nombre"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-2 ml-1">Apellido</label>
                                 <input
                                     type="text"
-                                    className="input pl-10"
-                                    value={firstName}
-                                    onChange={e => setFirstName(e.target.value)}
-                                    placeholder="Tu nombre"
+                                    className="input"
+                                    value={lastName}
+                                    onChange={e => setLastName(e.target.value)}
+                                    placeholder="Tu apellido"
                                 />
                             </div>
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-2 ml-1">Apellido</label>
-                            <input
-                                type="text"
-                                className="input"
-                                value={lastName}
-                                onChange={e => setLastName(e.target.value)}
-                                placeholder="Tu apellido"
-                            />
-                        </div>
-                        <div className="sm:col-span-2">
-                            <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-2 ml-1">Email</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20">
-                                    <Mail size={16} />
-                                </span>
-                                <input
-                                    type="email"
-                                    className="input pl-10 opacity-50 cursor-not-allowed"
-                                    value={user?.email}
-                                    readOnly
-                                    disabled
-                                />
+                            <div className="sm:col-span-2">
+                                <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-2 ml-1">Email</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20">
+                                        <Mail size={16} />
+                                    </span>
+                                    <input
+                                        type="email"
+                                        className="input pl-10 opacity-50 cursor-not-allowed"
+                                        value={currentUser?.email}
+                                        readOnly
+                                        disabled
+                                    />
+                                </div>
+                                <p className="text-[10px] text-muted mt-1.5 ml-1">El email no puede ser modificado por seguridad.</p>
                             </div>
-                            <p className="text-[10px] text-muted mt-1.5 ml-1">El email no puede ser modificado por seguridad.</p>
                         </div>
+
+                        <button
+                            onClick={handleSave}
+                            disabled={saving}
+                            className="btn-primary w-full mt-8 py-3.5 flex items-center justify-center gap-2 font-bold shadow-lg shadow-primary-500/20"
+                        >
+                            {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                            {saving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                        </button>
                     </div>
 
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="btn-primary w-full mt-8 py-3.5 flex items-center justify-center gap-2 font-bold shadow-lg shadow-primary-500/20"
-                    >
-                        {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                        {saving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
-                    </button>
+                    {/* Danger Zone */}
+                    <div className="p-4 rounded-2xl border border-red-500/20 bg-red-500/5">
+                        <h3 className="text-[10px] font-bold text-red-500/60 uppercase tracking-widest mb-2 px-1">Zona de Peligro</h3>
+                        <button className="w-full py-3 rounded-xl border border-red-500/20 text-red-500/60 text-xs font-bold hover:bg-red-500/10 transition-colors">
+                            ELIMINAR MI CUENTA
+                        </button>
+                        <p className="text-[9px] text-red-500/40 text-center mt-2 px-4 italic leading-tight">
+                            Esta acción es irreversible y borrará todos tus hábitos, tareas y racha.
+                        </p>
+                    </div>
                 </div>
-
-                {/* Danger Zone */}
-                <div className="p-4 rounded-2xl border border-red-500/20 bg-red-500/5">
-                    <h3 className="text-[10px] font-bold text-red-500/60 uppercase tracking-widest mb-2 px-1">Zona de Peligro</h3>
-                    <button className="w-full py-3 rounded-xl border border-red-500/20 text-red-500/60 text-xs font-bold hover:bg-red-500/10 transition-colors">
-                        ELIMINAR MI CUENTA
-                    </button>
-                    <p className="text-[9px] text-red-500/40 text-center mt-2 px-4 italic leading-tight">
-                        Esta acción es irreversible y borrará todos tus hábitos, tareas y racha.
-                    </p>
-                </div>
-            </div>
+            )}
             {toast && (
                 <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm animate-slide-up ${toast.type === 'success'
                     ? 'bg-gradient-to-r from-accent-green to-emerald-600 text-white'

@@ -8,6 +8,7 @@ import type { FriendEntry, FriendRequest, UserResult, ActivityItem, FriendMessag
 import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
 import { onSSE } from '@/services/sseConnection';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { habitApi } from '@/api/habits';
 
@@ -104,7 +105,9 @@ function FriendCard({ entry, onRemove, onMotivate, onCopyHabit }: {
             <div className="friend-card-top" onClick={toggleExpand}>
                 <div className="friend-avatar">{initials}</div>
                 <div className="friend-info">
-                    <h3 className="friend-name">{friend.name}</h3>
+                    <Link to={`/profile/${friend.id}`} className="friend-name hover:text-primary-400 transition-colors" onClick={e => e.stopPropagation()}>
+                        {friend.name}
+                    </Link>
                     <p className="friend-since">
                         <UserCheck size={12} /> Amigos desde {formatDate(since)}
                     </p>
@@ -311,7 +314,9 @@ function SearchResult({
     return (
         <div className="search-result">
             <div className="friend-avatar search-avatar">{initials}</div>
-            <span className="search-name">{user.name}</span>
+            <Link to={`/profile/${user.id}`} className="search-name hover:text-primary-400 transition-colors">
+                {user.name}
+            </Link>
             <button
                 className={`btn-send-request ${requestSent ? 'btn-sent' : ''}`}
                 onClick={onSend}
@@ -880,6 +885,7 @@ export default function FriendsPage() {
                     color: #fff;
                     font-size: 0.9rem;
                     font-weight: 500;
+                    text-decoration: none;
                 }
                 .btn-send-request {
                     display: flex;
@@ -1104,6 +1110,7 @@ export default function FriendsPage() {
                     font-weight: 600;
                     color: #fff;
                     margin: 0 0 2px;
+                    text-decoration: none;
                 }
                 .friend-since {
                     display: flex;

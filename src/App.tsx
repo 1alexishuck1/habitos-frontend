@@ -97,6 +97,7 @@ export default function App() {
                     <Route path="friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
                     <Route path="gym" element={<ProtectedRoute><GymPage /></ProtectedRoute>} />
                     <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                    <Route path="profile/:userId" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                     <Route path="admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
                     <Route path="smoke" element={<ProtectedRoute><SmokePage /></ProtectedRoute>} />
                     <Route path="smoke/onboarding" element={<ProtectedRoute><SmokeOnboardingPage /></ProtectedRoute>} />

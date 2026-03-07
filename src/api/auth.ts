@@ -25,6 +25,16 @@ export const authApi = {
     getProfileStats: () =>
         api.get<{ friendsCount: number; habitsDoneCount: number; tasksDoneCount: number }>('/auth/me/stats'),
 
+    getPublicProfile: (userId: string) =>
+        api.get<{
+            id: string;
+            name: string;
+            level: number;
+            experience: number;
+            stats: { friendsCount: number; habitsDoneCount: number; tasksDoneCount: number };
+            friendshipStatus: 'FRIENDS' | 'REQUEST_SENT' | 'REQUEST_RECEIVED' | 'NONE';
+        }>(`/auth/${userId}/profile`),
+
     deleteAccount: () =>
         api.delete('/auth/me'),
 
