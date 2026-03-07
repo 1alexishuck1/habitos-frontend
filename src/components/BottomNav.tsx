@@ -122,9 +122,17 @@ export default function MobileMenu() {
                 aria-label="Menú principal"
             >
                 {/* User info inside drawer */}
-                <div className="flex items-center gap-4 px-6 pb-8 pt-4 border-b border-surface-700/40">
-                    <div className="w-12 h-12 rounded-2xl bg-surface-700 flex items-center justify-center shadow-lg border border-surface-600/50">
-                        <UserIcon size={22} className="text-primary-400" />
+                <div className="flex items-center gap-4 px-6 pb-8 pt-4 border-b border-surface-700/40" onClick={() => { setOpen(false); navigate('/profile'); }}>
+                    <div className="w-12 h-12 rounded-2xl bg-surface-700 flex items-center justify-center shadow-lg border border-surface-600/50 overflow-hidden">
+                        {user?.avatarUrl ? (
+                            <img
+                                src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `${import.meta.env.VITE_API_URL || ''}${user.avatarUrl}?t=1`}
+                                className="w-full h-full object-cover"
+                                alt={user.name}
+                            />
+                        ) : (
+                            <UserIcon size={22} className="text-primary-400" />
+                        )}
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-base font-bold text-white truncate">{user?.name || 'Usuario'}</p>

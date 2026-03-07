@@ -18,6 +18,8 @@ export default defineConfig({
             '/friends': 'http://localhost:4000',
             '/push': 'http://localhost:4000',
             '/gym': 'http://localhost:4000',
+            '/users': 'http://localhost:4000',
+            '/avatars': 'http://localhost:4000',
         },
     },
 });

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { User, Mail, Shield, Award, Users, CheckCircle2, Flame, Save, Loader2, Camera, UserPlus, Check } from 'lucide-react';
+import { User, Mail, Shield, Award, Users, CheckCircle2, Flame, Save, Loader2, Camera, UserPlus, Check, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/api/auth';
 import { sendFriendRequest } from '@/api/friends';
@@ -31,6 +31,7 @@ export default function ProfilePage() {
     const [lastName, setLastName] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [showAvatarModal, setShowAvatarModal] = useState(false);
     const [toast, setToast] = useState<{ msg: string, type: 'success' | 'error' } | null>(null);
 
     const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -99,7 +100,11 @@ export default function ProfilePage() {
     };
 
     const handleAvatarClick = () => {
-        if (isMe) fileInputRef.current?.click();
+        if (isMe) {
+            fileInputRef.current?.click();
+        } else if (viewUser?.avatarUrl) {
+            setShowAvatarModal(true);
+        }
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,7 +157,9 @@ export default function ProfilePage() {
                         <div className="w-24 h-24 rounded-full bg-surface-700 border-4 border-surface-800 flex items-center justify-center overflow-hidden shadow-2xl relative">
                             {viewUser?.avatarUrl ? (
                                 <img
-                                    src={viewUser.avatarUrl.startsWith('http') ? viewUser.avatarUrl : `${API_URL}${viewUser.avatarUrl}`}
+                                    src={viewUser.avatarUrl.startsWith('http')
+                                        ? viewUser.avatarUrl
+                                        : `${API_URL}${viewUser.avatarUrl}?t=${isMe ? Date.now() : '1'}`}
                                     alt={viewUser.name}
                                     className="w-full h-full object-cover"
                                 />
@@ -328,6 +335,32 @@ export default function ProfilePage() {
                     </div>
                 </div>
             )}
+
+            {/* Avatar Preview Modal */}
+            {showAvatarModal && viewUser?.avatarUrl && (
+                <div
+                    className="fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-4 animate-fade-in"
+                    onClick={() => setShowAvatarModal(false)}
+                >
+                    <button
+                        className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                        onClick={() => setShowAvatarModal(false)}
+                    >
+                        <X size={24} />
+                    </button>
+                    <div className="max-w-full max-h-full" onClick={e => e.stopPropagation()}>
+                        <img
+                            src={viewUser.avatarUrl.startsWith('http') ? viewUser.avatarUrl : `${API_URL}${viewUser.avatarUrl}`}
+                            alt={viewUser.name}
+                            className="max-w-[95vw] max-h-[85vh] rounded-2xl shadow-2xl border border-white/10"
+                        />
+                        <div className="mt-4 text-center">
+                            <h3 className="text-white font-bold text-lg">{viewUser.name}</h3>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {toast && (
                 <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm animate-slide-up ${toast.type === 'success'
                     ? 'bg-gradient-to-r from-accent-green to-emerald-600 text-white'

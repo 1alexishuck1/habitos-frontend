@@ -58,8 +58,16 @@ export default function Sidebar() {
         <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-60 bg-surface-800 border-r border-surface-700/50 z-40 py-6">
             {/* User Info Header */}
             <div className="px-6 mb-8 flex items-center gap-3 group cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/profile')}>
-                <div className="w-10 h-10 rounded-xl bg-surface-700 flex items-center justify-center shadow-lg border border-surface-600/50">
-                    <UserIcon size={20} className="text-primary-400" />
+                <div className="w-10 h-10 rounded-xl bg-surface-700 flex items-center justify-center shadow-lg border border-surface-600/50 overflow-hidden">
+                    {user?.avatarUrl ? (
+                        <img
+                            src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `${import.meta.env.VITE_API_URL || ''}${user.avatarUrl}?t=1`}
+                            className="w-full h-full object-cover"
+                            alt={user.name}
+                        />
+                    ) : (
+                        <UserIcon size={20} className="text-primary-400" />
+                    )}
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{user?.name || 'Usuario'}</p>
