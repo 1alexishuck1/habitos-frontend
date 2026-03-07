@@ -4,7 +4,9 @@ import { useParams } from 'react-router-dom';
 import { User, Mail, Shield, Award, Users, CheckCircle2, Flame, Save, Loader2, Camera, UserPlus, Check, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/api/auth';
-import { sendFriendRequest } from '@/api/friends';
+import { sendFriendRequest, sendMessage } from '@/api/friends';
+import { ChatModal } from '@/components/ChatModal';
+import { Zap, MessageCircle } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -33,6 +35,7 @@ export default function ProfilePage() {
     const [saving, setSaving] = useState(false);
     const [showAvatarModal, setShowAvatarModal] = useState(false);
     const [avatarUpdateKey, setAvatarUpdateKey] = useState(Date.now());
+    const [showChat, setShowChat] = useState(false);
     const [toast, setToast] = useState<{ msg: string, type: 'success' | 'error' } | null>(null);
 
     const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -77,6 +80,16 @@ export default function ProfilePage() {
             showToast('Error al enviar solicitud', 'error');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleSendMotivation = async (msg: string) => {
+        if (!userId) return;
+        try {
+            await sendMessage(userId, msg);
+            showToast('¡Motivación enviada! ⚡');
+        } catch {
+            showToast('Error al enviar motivación', 'error');
         }
     };
 
@@ -211,9 +224,23 @@ export default function ProfilePage() {
                                 </button>
                             )}
                             {friendshipStatus === 'FRIENDS' && (
-                                <button disabled className="px-8 py-2.5 flex items-center gap-2 rounded-2xl bg-accent-green/10 text-accent-green text-xs font-bold border border-accent-green/20">
-                                    <Users size={16} /> YA SON AMIGOS
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button disabled className="px-8 py-2.5 flex items-center gap-2 rounded-2xl bg-accent-green/10 text-accent-green text-xs font-bold border border-accent-green/20">
+                                        <Users size={16} /> YA SON AMIGOS
+                                    </button>
+                                    <button
+                                        onClick={() => setShowChat(true)}
+                                        className="w-10 h-10 flex items-center justify-center bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 rounded-xl transition-all border border-primary-500/20 shadow-lg"
+                                        title="Enviar motivación"
+                                    >
+                                        <div className="relative">
+                                            <MessageCircle size={18} />
+                                            <div className="absolute -top-1 -right-1 bg-surface-800 rounded-full p-0.5 border border-surface-700">
+                                                <Zap size={9} className="fill-current text-accent-amber" />
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
                             )}
                             {friendshipStatus === 'REQUEST_RECEIVED' && (
                                 <button disabled className="px-8 py-2.5 flex items-center gap-2 rounded-2xl bg-accent-amber/10 text-accent-amber text-xs font-bold border border-accent-amber/20">
@@ -368,6 +395,15 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Chat Modal */}
+            {showChat && viewUser && (
+                <ChatModal
+                    friend={viewUser}
+                    onClose={() => setShowChat(false)}
+                    onSend={handleSendMotivation}
+                />
             )}
 
             {toast && (
