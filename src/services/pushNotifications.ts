@@ -5,9 +5,13 @@ import { useAuthStore } from '@/store/authStore';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+const API_SECRET = import.meta.env.VITE_API_SECRET || 'habitos-secret-key-1234';
+
 function getAuthHeader(): HeadersInit {
     const token = useAuthStore.getState().accessToken;
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    const headers: Record<string, string> = { 'x-api-key': API_SECRET };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
 }
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
@@ -18,7 +22,9 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 async function getVapidPublicKey(): Promise<string> {
-    const res = await fetch(`${API_URL}/push/vapid-public-key`);
+    const res = await fetch(`${API_URL}/push/vapid-public-key`, {
+        headers: getAuthHeader()
+    });
     const data = await res.json();
     return data.publicKey as string;
 }

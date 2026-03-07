@@ -152,10 +152,6 @@ export default function Sidebar() {
                     <LogOut size={18} strokeWidth={2} className="group-hover:translate-x-0.5 transition-transform" />
                     Cerrar sesión
                 </button>
-                <div className="flex items-center justify-between px-4 mt-2">
-                    <p className="text-[9px] font-black text-white/10 uppercase tracking-widest tabular-nums">v1.2.0</p>
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent-green/20 animate-pulse" />
-                </div>
             </div>
         </aside>
     );
