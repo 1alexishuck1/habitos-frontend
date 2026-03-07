@@ -8,7 +8,7 @@ import type { FriendEntry, FriendRequest, UserResult, ActivityItem, FriendMessag
 import { useAuthStore } from '@/store/authStore';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
 import { onSSE } from '@/services/sseConnection';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { habitApi } from '@/api/habits';
 
@@ -103,7 +103,7 @@ function FriendCard({ entry, onRemove, onMotivate, onCopyHabit }: {
         <div className="friend-card">
             {/* Top row: avatar + info + chevron */}
             <div className="friend-card-top" onClick={toggleExpand}>
-                <div className="friend-avatar">{initials}</div>
+                <Link to={`/profile/${friend.id}`} className="friend-avatar" onClick={e => e.stopPropagation()}>{initials}</Link>
                 <div className="friend-info">
                     <Link to={`/profile/${friend.id}`} className="friend-name hover:text-primary-400 transition-colors" onClick={e => e.stopPropagation()}>
                         {friend.name}
@@ -269,9 +269,11 @@ function RequestCard({
     const initials = request.sender.name.slice(0, 2).toUpperCase();
     return (
         <div className="request-card">
-            <div className="friend-avatar request-avatar">{initials}</div>
+            <Link to={`/profile/${request.sender.id}`} className="friend-avatar request-avatar">{initials}</Link>
             <div className="request-info">
-                <span className="friend-name">{request.sender.name}</span>
+                <Link to={`/profile/${request.sender.id}`} className="friend-name hover:text-primary-400 transition-colors">
+                    {request.sender.name}
+                </Link>
                 <span className="friend-since">
                     <Clock size={12} /> {formatDate(request.createdAt)}
                 </span>
@@ -313,7 +315,7 @@ function SearchResult({
     const initials = user.name.slice(0, 2).toUpperCase();
     return (
         <div className="search-result">
-            <div className="friend-avatar search-avatar">{initials}</div>
+            <Link to={`/profile/${user.id}`} className="friend-avatar search-avatar">{initials}</Link>
             <Link to={`/profile/${user.id}`} className="search-name hover:text-primary-400 transition-colors">
                 {user.name}
             </Link>
@@ -467,10 +469,12 @@ function ChatModal({
 
                 {/* Header */}
                 <div className="p-4 border-b border-surface-700 font-bold text-white flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-accent-amber/10 flex items-center justify-center flex-shrink-0">
-                        <Zap size={20} className="text-accent-amber" />
-                    </div>
-                    {t('friends.motivateTo', { name: friend.name })}
+                    <Link to={`/profile/${friend.id}`} className="friend-avatar w-10 h-10 text-[xs] rounded-full" style={{ width: 40, height: 40, fontSize: '0.75rem' }}>
+                        {friend.name.slice(0, 2).toUpperCase()}
+                    </Link>
+                    <Link to={`/profile/${friend.id}`} className="hover:text-primary-400 transition-colors text-white" style={{ textDecoration: 'none' }}>
+                        {friend.name}
+                    </Link>
                     <button onClick={onClose} disabled={sending} className="ml-auto w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-700 text-white/50 hover:text-white transition-colors">
                         <X size={18} />
                     </button>
@@ -1100,6 +1104,7 @@ export default function FriendsPage() {
                     font-size: 0.85rem;
                     color: #fff;
                     flex-shrink: 0;
+                    text-decoration: none;
                 }
                 .request-avatar { background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%); }
                 .search-avatar  { background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%); }

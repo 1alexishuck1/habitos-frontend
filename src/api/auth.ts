@@ -40,4 +40,9 @@ export const authApi = {
 
     experienceLogs: () =>
         api.get<import('@/types').ExperienceLog[]>('/auth/me/experience'),
+
+    uploadAvatar: (formData: FormData) =>
+        api.post<{ avatar_url: string }>('/users/avatar', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }),
 };

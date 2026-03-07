@@ -12,6 +12,7 @@ export interface User {
     createdAt: string;
     experience: number;
     level: number;
+    avatarUrl?: string;
 }
 
 export interface ExperienceLog {

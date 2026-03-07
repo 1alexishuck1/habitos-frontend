@@ -10,7 +10,7 @@ export default function LandingPage() {
     return (
         <div className="min-h-screen bg-surface-950 text-white selection:bg-primary-500/30">
             {/* Header / Nav */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-surface-950/80 backdrop-blur-xl border-b border-surface-800">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-surface-950/80 backdrop-blur-xl border-b border-surface-800" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center shadow-lg shadow-primary-500/5">
@@ -41,7 +41,7 @@ export default function LandingPage() {
             </header>
 
             {/* Hero Section */}
-            <section className="relative pt-40 pb-32 overflow-hidden">
+            <section className="relative pb-32 overflow-hidden" style={{ paddingTop: 'calc(10rem + env(safe-area-inset-top))' }}>
                 {/* Background Blobs */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent-amber/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />

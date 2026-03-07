@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { User, Mail, Shield, Award, Users, CheckCircle2, Flame, Save, Loader2, Camera, UserPlus, Check } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/api/auth';
 import { sendFriendRequest } from '@/api/friends';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export default function ProfilePage() {
     const { t } = useTranslation();
@@ -14,10 +16,10 @@ export default function ProfilePage() {
     // Who are we viewing?
     const isMe = !userId || userId === currentUser?.id;
 
-    // Profile data state
     const [viewUser, setViewUser] = useState<any>(null);
     const [friendshipStatus, setFriendshipStatus] = useState<'FRIENDS' | 'REQUEST_SENT' | 'REQUEST_RECEIVED' | 'NONE'>('NONE');
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [stats, setStats] = useState({
         friendsCount: 0,
         habitsDoneCount: 0,
@@ -87,9 +89,37 @@ export default function ProfilePage() {
             const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
             const { data } = await authApi.updateProfile({ name: fullName });
             setUser(data);
+            setViewUser(data);
             showToast('Perfil actualizado correctamente');
         } catch (error) {
             showToast('Error al actualizar el perfil', 'error');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleAvatarClick = () => {
+        if (isMe) fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        setSaving(true);
+        try {
+            const { data } = await authApi.uploadAvatar(formData);
+            if (currentUser) {
+                const updatedUser = { ...currentUser, avatarUrl: data.avatar_url };
+                setUser(updatedUser);
+                setViewUser(updatedUser);
+            }
+            showToast('¡Avatar actualizado! ✨');
+        } catch (error: any) {
+            showToast(error.response?.data?.error || 'Error al subir imagen', 'error');
         } finally {
             setSaving(false);
         }
@@ -105,19 +135,42 @@ export default function ProfilePage() {
 
     return (
         <div className="page-content animate-fade-in pb-20">
+            {/* Hidden Input for Avatar */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+            />
+
             {/* Header / Avatar Section */}
             <div className="relative mb-8 pt-10 px-4">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary-600/20 to-transparent -z-10 rounded-3xl" />
                 <div className="flex flex-col items-center">
-                    <div className="relative group">
+                    <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
                         <div className="w-24 h-24 rounded-full bg-surface-700 border-4 border-surface-800 flex items-center justify-center overflow-hidden shadow-2xl relative">
-                            {/* In a real app we'd have an image, using icon for now */}
-                            <User size={48} className="text-white/20" />
+                            {viewUser?.avatarUrl ? (
+                                <img
+                                    src={viewUser.avatarUrl.startsWith('http') ? viewUser.avatarUrl : `${API_URL}${viewUser.avatarUrl}`}
+                                    alt={viewUser.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <User size={48} className="text-white/20" />
+                            )}
+                            {isMe && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <Camera size={24} className="text-white" />
+                                </div>
+                            )}
                             <div className="absolute inset-0 bg-primary-500/10 mix-blend-overlay" />
                         </div>
-                        <button className="absolute bottom-0 right-0 p-2 bg-primary-500 rounded-full text-white shadow-lg transform transition-transform hover:scale-110 active:scale-95">
-                            <Camera size={16} />
-                        </button>
+                        {isMe && (
+                            <button className="absolute bottom-0 right-0 p-2 bg-primary-500 rounded-full text-white shadow-lg transform transition-transform hover:scale-110 active:scale-95">
+                                <Camera size={16} />
+                            </button>
+                        )}
                     </div>
 
                     <h1 className="text-2xl font-black text-white mt-4">{viewUser?.name}</h1>
