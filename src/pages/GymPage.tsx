@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Dumbbell, Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronUp, Weight } from 'lucide-react';
 import { gymApi, todayKey, loadDoneSet, saveDoneSet, type DayOfWeek, type WorkoutDay, type WorkoutExercise, type ExerciseInput } from '@/api/gym';
+import { useAuthStore } from '@/store/authStore';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -256,6 +257,7 @@ function DayCard({
     const [deleting, setDeleting] = useState<string | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [doneIds, setDoneIds] = useState<Set<string>>(() => loadDoneSet(dayKey));
+    const { refreshUser } = useAuthStore();
 
     // Sync name when data arrives
     useEffect(() => { setDayName(dayData?.name || ''); }, [dayData?.name]);
@@ -264,13 +266,26 @@ function DayCard({
     const hasExercises = exercises.length > 0;
 
     // Workout tracking helpers
-    function toggleDone(id: string) {
-        setDoneIds(prev => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id); else next.add(id);
-            saveDoneSet(dayKey, next);
-            return next;
-        });
+    async function toggleDone(id: string) {
+        const next = new Set(doneIds);
+        const wasAllDone = exercises.length > 0 && exercises.every(e => next.has(e.id));
+
+        if (next.has(id)) next.delete(id); else next.add(id);
+
+        setDoneIds(next);
+        saveDoneSet(dayKey, next);
+
+        const isAllDoneNow = exercises.length > 0 && exercises.every(e => next.has(e.id));
+
+        if (isToday) {
+            if (!wasAllDone && isAllDoneNow) {
+                await gymApi.log(dayKey, new Date().toISOString().split('T')[0]);
+                refreshUser();
+            } else if (wasAllDone && !isAllDoneNow) {
+                await gymApi.unlog(dayKey, new Date().toISOString().split('T')[0]);
+                refreshUser();
+            }
+        }
     }
 
     const firstPendingId = exercises.find(e => !doneIds.has(e.id))?.id ?? null;

@@ -60,7 +60,7 @@ export default function StatsPage() {
 
     const habitChartData = summary?.habitsData.map((h: any) => ({
         name: h.name.length > 8 ? h.name.substring(0, 8) + '..' : h.name,
-        pct: h.daysRequired > 0 ? Math.round((h.daysCompleted / h.daysRequired) * 100) : 0,
+        pct: h.daysRequired > 0 ? Math.min(Math.round((h.daysCompleted / h.daysRequired) * 100), 100) : 0,
     })) ?? [];
 
     const periodLabels: Record<Period, string> = {

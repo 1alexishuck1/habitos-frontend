@@ -177,13 +177,19 @@ export default function DashboardPage() {
         } catch { /* handled */ }
     };
 
+
+    const isSelectedToday = isSameDay(selectedDate, new Date());
     const doneHabits = habits.filter(h => h.todayCompleted).length;
     const pendingHabits = habits.length - doneHabits;
     const doneTasks = tasks.filter(t => t.status === 'DONE').length;
     const pendingTasks = tasks.length - doneTasks;
-    const totalPending = pendingHabits + pendingTasks;
-    const totalItems = habits.length + tasks.length;
-    const completionPct = totalItems > 0 ? Math.round(((doneHabits + doneTasks) / totalItems) * 100) : 0;
+
+    const gymDoneSet = isSelectedToday ? loadDoneSet(dayOfWeekKey) : new Set<string>();
+    const gymAllDone = gymDay && gymDay.exercises && gymDay.exercises.length > 0 && gymDay.exercises.every(e => gymDoneSet.has(e.id));
+
+    const totalPending = pendingHabits + pendingTasks + (gymDay && !gymAllDone ? 1 : 0);
+    const totalItems = habits.length + tasks.length + (gymDay ? 1 : 0);
+    const completionPct = totalItems > 0 ? Math.min(Math.round(((doneHabits + doneTasks + (gymAllDone ? 1 : 0)) / totalItems) * 100), 100) : 0;
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const weekDays = useMemo(() => {
@@ -191,7 +197,6 @@ export default function DashboardPage() {
         return Array.from({ length: 60 }).map((_, i) => addDays(today, i - 30));
     }, []);
 
-    const isSelectedToday = isSameDay(selectedDate, new Date());
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -317,7 +322,6 @@ export default function DashboardPage() {
             {gymDay && gymDay.exercises && gymDay.exercises.length > 0 && (() => {
                 const doneSet = isSelectedToday ? loadDoneSet(dayOfWeekKey) : new Set<string>();
                 const allDone = gymDay.exercises.every(e => doneSet.has(e.id));
-                const progress = `${doneSet.size}/${gymDay.exercises.length}`;
 
                 return (
                     <Link to="/gym" className="block mb-6">
@@ -336,9 +340,10 @@ export default function DashboardPage() {
                                         : `Hoy te toca ${gymDay.name ? `"${gymDay.name}"` : 'entrenar'} 💪`
                                     }
                                 </h2>
-                                {!allDone && doneSet.size > 0 && (
-                                    <p className="text-xs text-soft mt-1">Progreso: {progress}</p>
-                                )}
+                                {allDone
+                                    ? <p className="text-xs text-soft mt-1">¡Objetivo cumplido! +50EXP</p>
+                                    : <p className="text-xs text-soft mt-1">Completala y suma <span className="text-primary-400 font-bold">50EXP</span></p>
+                                }
                             </div>
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
                                             ${allDone ? 'bg-indigo-500/20' : 'bg-emerald-500/20'}`}>

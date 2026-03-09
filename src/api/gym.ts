@@ -77,4 +77,10 @@ export const gymApi = {
 
     deleteExercise: (id: string) =>
         api.delete(`/gym/exercises/${id}`).then(r => r.data),
+
+    log: (day: DayOfWeek, dateStr: string) =>
+        api.post(`/gym/${day}/log`, { dateStr }).then(r => r.data),
+
+    unlog: (day: DayOfWeek, dateStr: string) =>
+        api.delete(`/gym/${day}/log`, { params: { dateStr } }).then(r => r.data),
 };
