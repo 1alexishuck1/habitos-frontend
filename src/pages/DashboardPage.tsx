@@ -191,6 +191,39 @@ export default function DashboardPage() {
     const totalItems = habits.length + tasks.length + (gymDay ? 1 : 0);
     const completionPct = totalItems > 0 ? Math.min(Math.round(((doneHabits + doneTasks + (gymAllDone ? 1 : 0)) / totalItems) * 100), 100) : 0;
 
+    const gymCard = gymDay && gymDay.exercises && gymDay.exercises.length > 0 && (
+        <Link to="/gym" className="block mb-6">
+            <div className={`card transition-colors flex items-center justify-between gap-3
+                             ${gymAllDone
+                    ? 'bg-gradient-to-br from-indigo-600/20 to-surface-800 border-indigo-500/20 hover:border-indigo-500/40'
+                    : 'bg-gradient-to-br from-emerald-600/20 to-surface-800 border-emerald-500/20 hover:border-emerald-500/40'}`}>
+                <div className="min-w-0 flex-1">
+                    <p className={`text-xs font-bold uppercase tracking-widest mb-1
+                                 ${gymAllDone ? 'text-indigo-400' : 'text-emerald-400'}`}>
+                        {gymAllDone ? 'Entrenamiento' : 'Gimnasio'}
+                    </p>
+                    <h2 className="text-base font-bold text-white leading-tight">
+                        {gymAllDone
+                            ? '¡Rutina completada! 🎉'
+                            : `Hoy te toca ${gymDay.name ? `"${gymDay.name}"` : 'entrenar'} 💪`
+                        }
+                    </h2>
+                    {gymAllDone
+                        ? <p className="text-xs text-soft mt-1">¡Objetivo cumplido! +50EXP</p>
+                        : <p className="text-xs text-soft mt-1">Completala y suma <span className="text-primary-400 font-bold">50EXP</span></p>
+                    }
+                </div>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
+                                ${gymAllDone ? 'bg-indigo-500/20' : 'bg-emerald-500/20'}`}>
+                    {gymAllDone
+                        ? <Award size={20} className="text-indigo-400" />
+                        : <Dumbbell size={20} className="text-emerald-400" />
+                    }
+                </div>
+            </div>
+        </Link>
+    );
+
     const scrollRef = useRef<HTMLDivElement>(null);
     const weekDays = useMemo(() => {
         const today = new Date();
@@ -318,44 +351,8 @@ export default function DashboardPage() {
                 <div className="absolute bottom-0 left-0 h-1 bg-primary-500 transition-all duration-500" style={{ width: `${completionPct}%` }} />
             </div>
 
-            {/* Gym Motivation */}
-            {gymDay && gymDay.exercises && gymDay.exercises.length > 0 && (() => {
-                const doneSet = isSelectedToday ? loadDoneSet(dayOfWeekKey) : new Set<string>();
-                const allDone = gymDay.exercises.every(e => doneSet.has(e.id));
-
-                return (
-                    <Link to="/gym" className="block mb-6">
-                        <div className={`card transition-colors flex items-center justify-between gap-3
-                                         ${allDone
-                                ? 'bg-gradient-to-br from-indigo-600/20 to-surface-800 border-indigo-500/20 hover:border-indigo-500/40'
-                                : 'bg-gradient-to-br from-emerald-600/20 to-surface-800 border-emerald-500/20 hover:border-emerald-500/40'}`}>
-                            <div className="min-w-0 flex-1">
-                                <p className={`text-xs font-bold uppercase tracking-widest mb-1
-                                             ${allDone ? 'text-indigo-400' : 'text-emerald-400'}`}>
-                                    {allDone ? 'Entrenamiento' : 'Gimnasio'}
-                                </p>
-                                <h2 className="text-base font-bold text-white leading-tight">
-                                    {allDone
-                                        ? '¡Rutina completada! 🎉'
-                                        : `Hoy te toca ${gymDay.name ? `"${gymDay.name}"` : 'entrenar'} 💪`
-                                    }
-                                </h2>
-                                {allDone
-                                    ? <p className="text-xs text-soft mt-1">¡Objetivo cumplido! +50EXP</p>
-                                    : <p className="text-xs text-soft mt-1">Completala y suma <span className="text-primary-400 font-bold">50EXP</span></p>
-                                }
-                            </div>
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
-                                            ${allDone ? 'bg-indigo-500/20' : 'bg-emerald-500/20'}`}>
-                                {allDone
-                                    ? <Award size={20} className="text-indigo-400" />
-                                    : <Dumbbell size={20} className="text-emerald-400" />
-                                }
-                            </div>
-                        </div>
-                    </Link>
-                );
-            })()}
+            {/* Gym Motivation - Top position (only if pending) */}
+            {!gymAllDone && gymCard}
 
             {/* Removed Experience Section for new Progress Page */}
 
@@ -427,6 +424,9 @@ export default function DashboardPage() {
                             ))}
                         </section>
                     )}
+
+                    {/* Gym Motivation - Bottom position (only if completed) */}
+                    {gymAllDone && gymCard}
 
                     {habits.length === 0 && tasks.length === 0 && (!gymDay || !gymDay.exercises || gymDay.exercises.length === 0) && (
                         <div className="text-center py-12">
