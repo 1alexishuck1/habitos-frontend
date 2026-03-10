@@ -4,6 +4,7 @@ import MobileMenu from './BottomNav';
 import Sidebar from './Sidebar';
 import IosInstallBanner from './IosInstallBanner';
 import XPToast from './XPToast';
+import CelebrationModal from './CelebrationModal';
 import { onSSE } from '@/services/sseConnection';
 import { useFriendNotifStore } from '@/store/friendNotifStore';
 import * as friendsApi from '@/api/friends';
@@ -68,6 +69,9 @@ export default function Layout() {
 
             {/* XP Animation */}
             <XPToast />
+
+            {/* Special Celebration */}
+            <CelebrationModal />
         </div>
     );
 }

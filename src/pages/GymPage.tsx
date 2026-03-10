@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Dumbbell, Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronUp, Weight } from 'lucide-react';
 import { gymApi, todayKey, loadDoneSet, saveDoneSet, type DayOfWeek, type WorkoutDay, type WorkoutExercise, type ExerciseInput } from '@/api/gym';
 import { useAuthStore } from '@/store/authStore';
+import { format } from 'date-fns';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -278,11 +279,12 @@ function DayCard({
         const isAllDoneNow = exercises.length > 0 && exercises.every(e => next.has(e.id));
 
         if (isToday) {
+            const dateStr = format(new Date(), 'yyyy-MM-dd');
             if (!wasAllDone && isAllDoneNow) {
-                await gymApi.log(dayKey, new Date().toISOString().split('T')[0]);
+                await gymApi.log(dayKey, dateStr);
                 refreshUser();
             } else if (wasAllDone && !isAllDoneNow) {
-                await gymApi.unlog(dayKey, new Date().toISOString().split('T')[0]);
+                await gymApi.unlog(dayKey, dateStr);
                 refreshUser();
             }
         }
