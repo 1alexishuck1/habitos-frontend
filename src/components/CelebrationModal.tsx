@@ -3,8 +3,7 @@ import { useAuthStore } from '@/store/authStore';
 import { X, GraduationCap, PartyPopper } from 'lucide-react';
 
 const CELEBRATED_USERS = [
-    '7cf8c230-024e-44c8-8c3f-b5f59e86f438',
-    '1c30001a-ba62-47f4-ad41-bbcdc137e221'
+    '7cf8c230-024e-44c8-8c3f-b5f59e86f438'
 ];
 
 // March 10, 2026 at 21:00 ARG (UTC-3) -> March 11, 2026 at 00:00 UTC
@@ -66,6 +65,10 @@ export default function CelebrationModal() {
 
                         <p className="text-white/80 text-sm">
                             ¡Un pasito más cerca de la meta! Estamos orgullosos de todo tu esfuerzo. No pares que ya falta nada. 🚀
+                        </p>
+
+                        <p className="text-white font-bold text-lg pt-2 animate-bounce-slow">
+                            ¡Te quiero mucho! ❤️
                         </p>
                     </div>
 
