@@ -10,6 +10,9 @@ export const authApi = {
     login: (data: { email: string; password: string }) =>
         api.post<{ accessToken: string; refreshToken: string; user: User }>('/auth/login', data),
 
+    googleAuth: (idToken: string) =>
+        api.post<{ accessToken: string; refreshToken: string; user: User }>('/auth/google', { idToken }),
+
     refresh: (refreshToken: string) =>
         api.post<{ accessToken: string; refreshToken: string }>('/auth/refresh', { refreshToken }),
 

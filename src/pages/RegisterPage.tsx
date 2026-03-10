@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Flame, Eye, EyeOff } from 'lucide-react';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
+import GoogleLoginButton from '@/components/GoogleLoginButton';
 
 // Register page
 
@@ -58,6 +59,15 @@ export default function RegisterPage() {
                         {error}
                     </div>
                 )}
+
+                <div className="mb-5">
+                    <GoogleLoginButton />
+                    <div className="flex items-center gap-3 my-4">
+                        <div className="h-px flex-1 bg-surface-700/50"></div>
+                        <span className="text-[10px] text-muted font-medium uppercase tracking-wider px-1">O con email</span>
+                        <div className="h-px flex-1 bg-surface-700/50"></div>
+                    </div>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">

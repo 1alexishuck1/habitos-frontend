@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Flame, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
+import GoogleLoginButton from '@/components/GoogleLoginButton';
 
 // Login page
 
@@ -64,11 +65,19 @@ export default function LoginPage() {
                 <h2 className="text-base font-semibold text-white mb-4">{t('auth.login')}</h2>
 
                 {error && (
-                    <div className="mb-4 px-3.5 py-3 rounded-xl bg-accent-red/10 border border-accent-red/20 flex items-start gap-2.5 animate-fade-in">
-                        <AlertCircle size={16} className="text-accent-red flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-accent-red leading-relaxed">{error}</p>
+                    <div className="mb-3 px-3 py-2 rounded-lg bg-accent-red/10 border border-accent-red/30 text-accent-red text-xs">
+                        {error}
                     </div>
                 )}
+
+                <div className="mb-5">
+                    <GoogleLoginButton />
+                    <div className="flex items-center gap-3 my-4">
+                        <div className="h-px flex-1 bg-surface-700/50"></div>
+                        <span className="text-[10px] text-muted font-medium uppercase tracking-wider px-1">O con email</span>
+                        <div className="h-px flex-1 bg-surface-700/50"></div>
+                    </div>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-3">
                     <div>
