@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Flame, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Flame, Eye, EyeOff } from 'lucide-react';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
 import GoogleLoginButton from '@/components/GoogleLoginButton';
@@ -31,7 +31,7 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
