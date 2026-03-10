@@ -187,9 +187,9 @@ export default function DashboardPage() {
     const gymDoneSet = isSelectedToday ? loadDoneSet(dayOfWeekKey) : new Set<string>();
     const gymAllDone = gymDay && gymDay.exercises && gymDay.exercises.length > 0 && gymDay.exercises.every(e => gymDoneSet.has(e.id));
 
-    const totalPending = pendingHabits + pendingTasks + (gymDay && !gymAllDone ? 1 : 0);
-    const totalItems = habits.length + tasks.length + (gymDay ? 1 : 0);
-    const completionPct = totalItems > 0 ? Math.min(Math.round(((doneHabits + doneTasks + (gymAllDone ? 1 : 0)) / totalItems) * 100), 100) : 0;
+    const totalPending = pendingHabits + pendingTasks;
+    const totalItems = habits.length + tasks.length;
+    const completionPct = totalItems > 0 ? Math.min(Math.round(((doneHabits + doneTasks) / totalItems) * 100), 100) : 0;
 
     const gymCard = gymDay && gymDay.exercises && gymDay.exercises.length > 0 && (
         <Link to="/gym" className="block mb-6">
