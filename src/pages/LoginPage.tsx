@@ -116,6 +116,12 @@ export default function LoginPage() {
                     <button type="submit" className="btn-primary w-full mt-1" disabled={loading}>
                         {loading ? t('common.loading') : t('auth.login')}
                     </button>
+
+                    <div className="text-center mt-3">
+                        <Link to="/forgot-password" className="text-xs text-muted hover:text-white transition-colors">
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                    </div>
                 </form>
 
                 <p className="text-center text-xs text-muted mt-4">
