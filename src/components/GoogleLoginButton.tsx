@@ -4,6 +4,7 @@ import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '@/config/firebase';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
+import emailjs from '@emailjs/browser';
 
 export default function GoogleLoginButton() {
     const navigate = useNavigate();
@@ -19,6 +20,58 @@ export default function GoogleLoginButton() {
             const idToken = await result.user.getIdToken();
 
             const { data } = await authApi.googleAuth(idToken);
+
+            // Send welcome email if the user was just created
+            // We check if createdAt is within the last 30 seconds
+            if (data.user && new Date(data.user.createdAt).getTime() > Date.now() - 30000) {
+                try {
+                    const htmlMessage = `
+                    <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.2);">
+                        <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 32px 24px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;">Hábitos</h1>
+                            <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">¡Bienvenido a la comunidad!</p>
+                        </div>
+                        <div style="padding: 40px 32px; background-color: #1e293b;">
+                            <h2 style="color: #f8fafc; font-size: 20px; font-weight: 600; margin: 0 0 16px 0;">¡Hola ${data.user.name.split(' ')[0]}!</h2>
+                            <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                                Estamos muy emocionados de tenerte en <strong>Hábitos</strong>. Nuestra misión es ayudarte a construir tu mejor versión, día a día, a tu propio ritmo.
+                            </p>
+                            <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin: 0 0 32px 0;">
+                                Ya podés empezar a crear tus primeros hábitos, completar tus tareas diarias y ver tu progreso junto a amigos.
+                            </p>
+                            <div style="text-align: center; margin-bottom: 32px;">
+                                <a href="https://habitos-frontend-ashy.vercel.app" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; font-weight: 600; padding: 14px 28px; border-radius: 8px; font-size: 16px; letter-spacing: 0.025em; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">Ir a la aplicación</a>
+                            </div>
+                            <p style="color: #64748b; font-size: 14px; line-height: 1.5; margin: 0;">
+                                Si tenés alguna duda o sugerencia, no dudes en contactarnos.<br/>
+                                ¡Mucho éxito en tu camino!
+                            </p>
+                        </div>
+                        <div style="background-color: #0f172a; padding: 24px; text-align: center; border-top: 1px solid #1e293b;">
+                            <p style="color: #475569; font-size: 12px; margin: 0;">
+                                © ${new Date().getFullYear()} Hábitos App. Todos los derechos reservados.<br/>
+                                Tu día, tu ritmo.
+                            </p>
+                        </div>
+                    </div>
+                    `;
+
+                    await emailjs.send(
+                        'service_caf0vou',
+                        'template_74s9jcz',
+                        {
+                            title: "¡Bienvenido a Hábitos!",
+                            name: "Hábitos App",
+                            email: data.user.email,
+                            to_email: data.user.email,
+                            message: htmlMessage
+                        },
+                        'ahgT31ZZZoM6eo06G'
+                    );
+                } catch (emailError) {
+                    console.error('Error enviando correo de bienvenida via Google Auth:', emailError);
+                }
+            }
 
             setTokens(data.accessToken, data.refreshToken);
             setUser(data.user);

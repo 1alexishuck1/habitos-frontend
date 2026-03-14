@@ -67,9 +67,10 @@ export default function RegisterPage() {
                     'service_caf0vou',
                     'template_74s9jcz',
                     {
-                        title: "¡Bienvenido a Hábitos! 🔥",
+                        title: "¡Bienvenido a Hábitos!",
                         name: "Hábitos App",
                         email: form.email,
+                        to_email: form.email,
                         message: htmlMessage
                     },
                     'ahgT31ZZZoM6eo06G'
