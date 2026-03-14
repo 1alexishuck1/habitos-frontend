@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const [error, setError] = useState('');
+    const [error, setError] = useState<string | React.ReactNode>('');
     const [successMsg, setSuccessMsg] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -48,13 +48,25 @@ export default function ForgotPasswordPage() {
                 );
             }
 
-            setSuccessMsg('Se ha enviado un código a tu correo (si está registrado). Revisá tu bandeja de entrada o spam.');
+            setSuccessMsg('Se ha enviado un código a tu correo. Revisá tu bandeja de entrada o spam.');
             setTimeout(() => {
                 setStep(2);
                 setSuccessMsg('');
             }, 3000);
         } catch (err: any) {
-            setError(err.response?.data?.error ?? 'Error al solicitar el cambio de contraseña');
+            const backendError = err.response?.data?.error;
+            if (err.response?.status === 404 || (backendError && backendError.includes('no se encuentra registrado'))) {
+                setError(
+                    <span>
+                        El correo no se encuentra registrado.{' '}
+                        <Link to="/register" className="font-bold underline hover:text-white transition-colors">
+                            Registrate acá.
+                        </Link>
+                    </span>
+                );
+            } else {
+                setError(backendError ?? 'Error al solicitar el cambio de contraseña');
+            }
         } finally {
             setLoading(false);
         }
@@ -102,14 +114,16 @@ export default function ForgotPasswordPage() {
                 </div>
             </div>
 
-            <div className="w-full max-w-sm card animate-slide-up relative">
-                <Link to="/login" className="absolute top-4 left-4 text-white/40 hover:text-white transition-colors">
-                    <ArrowLeft size={18} />
-                </Link>
+            <div className="w-full max-w-sm card animate-slide-up">
+                <div className="relative mb-4 flex items-center justify-center">
+                    <Link to="/login" className="absolute left-0 text-white/40 hover:text-white transition-colors">
+                        <ArrowLeft size={18} />
+                    </Link>
 
-                <h2 className="text-base font-semibold text-white mb-4 text-center mt-2">
-                    {step === 1 ? 'Olvidé mi contraseña' : 'Nueva contraseña'}
-                </h2>
+                    <h2 className="text-base font-semibold text-white text-center">
+                        {step === 1 ? 'Olvidé mi contraseña' : 'Nueva contraseña'}
+                    </h2>
+                </div>
 
                 {error && (
                     <div className="mb-4 px-3 py-2 rounded-lg bg-accent-red/10 border border-accent-red/30 text-accent-red text-xs text-center">
