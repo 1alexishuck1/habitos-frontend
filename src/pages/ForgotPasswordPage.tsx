@@ -35,14 +35,43 @@ export default function ForgotPasswordPage() {
 
             // Si hay un código, procedemos a enviar el email
             if (data.code) {
+                const htmlMessage = `
+                <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.2);">
+                    <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 32px 24px; text-align: center;">
+                        <img src="https://i.imgur.com/k6P9wG5.png" alt="Hábitos Logo" style="width: 48px; height: 48px; margin-bottom: 16px;" />
+                        <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;">Hábitos</h1>
+                        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">Recuperación de cuenta</p>
+                    </div>
+                    <div style="padding: 40px 32px; background-color: #1e293b;">
+                        <h2 style="color: #f8fafc; font-size: 20px; font-weight: 600; margin: 0 0 16px 0;">¡Hola!</h2>
+                        <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin: 0 0 32px 0;">
+                            Recibimos una solicitud para restablecer la contraseña de tu cuenta en Hábitos. Utilizá el siguiente código de seguridad de 6 dígitos para continuar:
+                        </p>
+                        <div style="background-color: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 32px;">
+                            <span style="font-family: monospace; font-size: 36px; font-weight: 700; color: #60a5fa; letter-spacing: 0.25em;">${data.code}</span>
+                        </div>
+                        <p style="color: #64748b; font-size: 14px; line-height: 1.5; margin: 0;">
+                            Este código expirará en <strong>15 minutos</strong>.<br/>
+                            Si no solicitaste este cambio, podés ignorar este correo de forma segura. Tu contraseña no cambiará hasta que ingreses este código y crees una nueva.
+                        </p>
+                    </div>
+                    <div style="background-color: #0f172a; padding: 24px; text-align: center; border-top: 1px solid #1e293b;">
+                        <p style="color: #475569; font-size: 12px; margin: 0;">
+                            © ${new Date().getFullYear()} Hábitos App. Todos los derechos reservados.<br/>
+                            Tu día, tu ritmo.
+                        </p>
+                    </div>
+                </div>
+                `;
+
                 await emailjs.send(
                     'service_caf0vou',
                     'template_74s9jcz',
                     {
-                        title: "Código de recuperación",
+                        title: "Recuperá tu contraseña - Hábitos",
                         name: "Hábitos App",
                         email: email,
-                        message: `Tu código de recuperación es: ${data.code}`
+                        message: htmlMessage
                     },
                     'ahgT31ZZZoM6eo06G'
                 );
@@ -160,7 +189,7 @@ export default function ForgotPasswordPage() {
                         </button>
                     </form>
                 ) : (
-                    <form onSubmit={handleResetPassword} className="space-y-4">
+                    <form onSubmit={handleResetPassword} className="space-y-4" autoComplete="off">
                         <p className="text-xs text-muted text-center px-2">
                             Ingresá el código que recibiste en <strong>{email}</strong> y elegí una nueva contraseña.
                         </p>
@@ -174,6 +203,7 @@ export default function ForgotPasswordPage() {
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
                                 maxLength={6}
+                                autoComplete="one-time-code"
                                 required
                             />
                         </div>
@@ -188,6 +218,7 @@ export default function ForgotPasswordPage() {
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     minLength={8}
+                                    autoComplete="new-password"
                                     required
                                 />
                                 <button
@@ -210,6 +241,7 @@ export default function ForgotPasswordPage() {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     minLength={8}
+                                    autoComplete="new-password"
                                     required
                                 />
                             </div>
