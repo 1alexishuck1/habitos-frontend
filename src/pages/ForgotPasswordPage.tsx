@@ -38,7 +38,6 @@ export default function ForgotPasswordPage() {
                 const htmlMessage = `
                 <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.2);">
                     <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 32px 24px; text-align: center;">
-                        <img src="https://i.imgur.com/k6P9wG5.png" alt="Hábitos Logo" style="width: 48px; height: 48px; margin-bottom: 16px;" />
                         <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;">Hábitos</h1>
                         <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">Recuperación de cuenta</p>
                     </div>
