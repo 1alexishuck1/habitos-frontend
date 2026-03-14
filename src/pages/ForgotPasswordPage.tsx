@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
             if (data.code) {
                 await emailjs.send(
                     'service_caf0vou',
-                    'template_u9aoqas',
+                    'template_74s9jcz',
                     {
                         title: "Código de recuperación",
                         name: "Hábitos App",
